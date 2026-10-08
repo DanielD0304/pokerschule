@@ -1,0 +1,22 @@
+{
+  "name": "pokerschule",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Poker-Trainer mit Solver-Bots: Grundlagen bis River, Analyse jeder Entscheidung, Ratings",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test --experimental-test-coverage --test-coverage-include=src/core/** --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=70 \"test/*.test.js\"",
+    "test:fast": "node --test \"test/*.test.js\"",
+    "solve:preflop": "node solver/precompute.js 30000",
+    "solve:hu": "node solver/cfr.js 3000",
+    "solve:flop": "node solver/flopsolve.js 1000",
+    "solve:river": "node solver/riversolve.js 1500",
+    "solve": "npm run solve:preflop && npm run solve:hu && npm run solve:flop && npm run solve:river && npm run build"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}
