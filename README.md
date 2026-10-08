@@ -1,23 +1,19 @@
 # Pokerschule
 
-Ein Trainer für No-Limit Texas Hold'em, der von den Grundlagen bis zum River führt. Bewertet wird, wie gut du entscheidest, nicht ob du die Hand gewinnst – ähnlich wie die Analyse bei chess.com.
+Lernplattform für No-Limit Texas Hold'em nach dem Vorbild von chess.com: spielen gegen Bots, gezielt trainieren, lernen, und für jede Entscheidung eine Analyse gegen einen Solver. Bewertet wird, wie gut du entscheidest, nicht ob du die Hand gewinnst.
 
-Die fertige App ist eine einzige Datei: **`dist/index.html`**. Sie braucht keinen Server und stellt keine Anfragen an Dritte; Schriften und Solver-Daten sind eingebettet. Öffne sie im Browser oder lege sie auf ein statisches Hosting.
+Die Website ist eine React-App (Vite) ohne Server. Der Fortschritt liegt im Browser; Konten und Spiel gegen Menschen folgen in einem späteren Schritt.
 
 ## Bereiche
 
-| Tab | Inhalt |
+| Seite | Inhalt |
 |---|---|
-| Übersicht | Gesamt-Dashboard: Ratings, Genauigkeit, größte Lecks, Aktivität; Fortschritt sichern und laden |
-| Fehler-Training | Deine Fehler kommen wieder, nach dem Leitner-System mit drei Boxen |
-| 1 · Grundlagen | Ablauf einer Hand, Positionen, Rangfolge der Hände |
-| 2 · Wer gewinnt? | Showdown-Quiz |
-| 3 · Preflop | Raise oder Fold im 6-max mit Faustregel-Ranges, Hände in echter Verteilung |
-| 4 · Pot Odds | Call oder Fold mit Draws, in BB; Turn (eine Karte) und Flop (zwei Karten), mit Hinweisen zu unsauberen Outs |
-| 5 · Arena | Heads-up-Push/Fold-Match gegen einen Nash-Bot oder einen Freizeitspieler-Bot |
-| 6 · Duell 100 BB | Preflop heads-up mit 3-Bets und 4-Bets |
-| 7 · Flop | Flop-Entscheidungen in Single-Raised-Pots auf 12 Boards |
-| 8 · River | Exakt gelöste River-Spots, auch mit Overbets |
+| Start `/` | Empfehlung aus deinen Lecks, Ratings, Schnellstart |
+| Spielen `/spielen` | Push/Fold-Arena (Match gegen Freizeitspieler- oder Nash-Bot), Preflop-Duell mit 100 BB |
+| Training `/training` | Flop, River (exakt gelöst), Fehler-Training, Quiz: Wer gewinnt?, Raise oder Fold?, Pot Odds |
+| Lernen `/lernen` | Ablauf einer Hand, Rangfolge, Open-Raise-Ranges |
+| Statistik `/statistik` | Ratings, Genauigkeit, größte Lecks, Aktivität, Sichern/Laden, Zurücksetzen |
+| Rangliste `/rangliste` | Deine Einordnung gegenüber Referenzspielern |
 
 Jede Analyse nennt den EV aller Optionen, deinen EV-Verlust, eine Einstufung von „Bester Zug“ bis „Patzer“, den Strategie-Chart und das zugrunde liegende Modell mit seinen Grenzen.
 
@@ -27,44 +23,42 @@ Voraussetzung: Node.js 20 oder neuer.
 
 ```bash
 npm ci
-npm test          # alle Tests mit Abdeckungsprüfung (Kernlogik ≥ 80 %)
-npm run build     # src/ + data/ + fonts/ → dist/index.html
+npm run dev       # Entwicklungsserver auf http://localhost:5173
+npm test          # Tests mit Abdeckungsprüfung (Kernlogik ≥ 80 %)
+npm run build     # Produktions-Build nach dist/
+npm run preview   # Build lokal ansehen
 ```
 
-`npm run test:fast` lässt die Tests ohne Abdeckungsmessung laufen. Der Evaluator-Test vergleicht 1 Mio. zufällige Hände mit einer unabhängigen Referenzbewertung und dauert etwa eine Minute.
-
-Die CI (`.github/workflows/ci.yml`) führt bei jedem Push Tests und Build aus und prüft, dass das eingecheckte `dist/index.html` aktuell ist. Nach Änderungen an `src/`, `data/` oder `fonts/` also immer `npm run build` ausführen und `dist/index.html` mit committen.
+Der Evaluator-Test vergleicht 1 Mio. zufällige Hände mit einer unabhängigen Referenzbewertung und dauert etwa eine Minute. Die CI (`.github/workflows/ci.yml`) führt bei jedem Push Tests und Build aus.
 
 ### Aufbau
 
 ```
-src/core/      reine Logik ohne DOM, vollständig getestet
-  cards.js       Kartenkodierung, 169 Starthand-Klassen
-  evaluator.js   die einzige Handbewertung für App und Solver
-  equity.js      Equity Hand gegen Hand (Monte Carlo, exakt)
-  ranges.js      Range-Notation
-  rating.js      Bewertung einer Entscheidung, Elo-Rating
-  potodds.js     Pot-Odds-Szenarien
-  preflop.js     Preflop-Tabellen aus den Solver-Daten
-  pushfold.js    Push/Fold-Bots und EV
-  hutree.js      EV im Heads-up-Preflop-Baum
-  storage.js     Speicherstand v2, Migration von v1, Export/Import
-src/app/       Oberfläche, ein Modul je Tab
-src/index.html, src/styles.css
-solver/        Solver-Skripte (nutzen src/core/evaluator.js)
-data/          erzeugte Solver-Daten
-fonts/         eingebettete Schriften und ihre Lizenzen
-test/          node:test-Suites
-dist/          Build-Ergebnis
+index.html          Einstieg für Vite
+src/web/            React: Layout (Seitenleiste, mobile Tab-Leiste), Seiten, Designsystem (styles.css)
+src/modes/          Spielmodi und Fortschritt (imperativ, in Seiten eingehängt über ModeHost)
+src/core/           reine Logik ohne DOM, vollständig getestet
+  evaluator.js        die einzige Handbewertung für App und Solver
+  rating.js           Bewertung einer Entscheidung, Elo-Rating
+  storage.js          Speicherstand v2, Migration von v1, Export/Import
+  …                   Karten, Equity, Ranges, Pot Odds, Preflop, Push/Fold, Heads-up-Baum
+public/data/        Solver-Daten, werden erst geladen, wenn ein Modus sie braucht
+public/fonts/       JetBrains Mono (Zahlen) und ihre Lizenz; sonst Systemschrift
+solver/             Solver-Skripte
+test/               node:test-Suites
 ```
+
+### Hosting
+
+Die Seite ist statisch und läuft auf Vercel (`vercel.json`) oder Netlify (`netlify.toml`); beide Dateien leiten alle Pfade auf `index.html` um, damit Unterseiten auch beim direkten Aufruf funktionieren. Repository einmal im Dashboard des Anbieters verbinden; danach baut jeder Push automatisch.
 
 ### Speicherstand
 
-Der Fortschritt liegt im `localStorage` unter dem Schlüssel `pokerschule` (Schema-Version 2). Alte v1-Stände (`pokerschule.*.v1`) werden beim ersten Start übernommen und danach gelöscht. Künftige Schemaänderungen kommen als Funktion in `migrations` in `src/core/storage.js`.
+Der Fortschritt liegt im `localStorage` unter dem Schlüssel `pokerschule` (Schema-Version 2). Alte v1-Stände werden beim ersten Start übernommen. Künftige Schemaänderungen kommen als Funktion in `migrations` in `src/core/storage.js`.
 
 ## Solver
 
-Die Skripte in `solver/` erzeugen die Daten in `data/` neu:
+Die Skripte in `solver/` erzeugen die Daten in `public/data/` neu:
 
 | Skript | Ausgabe | Inhalt |
 |---|---|---|
@@ -74,7 +68,7 @@ Die Skripte in `solver/` erzeugen die Daten in `data/` neu:
 | `riversolve.js [iter]` | `river-data.json` | 24 River-Spots, exakt gelöst, mit Lösungsgüte je Spot |
 
 ```bash
-npm run solve     # alle vier Solver nacheinander, danach Build (etwa 5 bis 20 Minuten)
+npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schreibt nach public/data/
 ```
 
 **Lösungsgüte** heißt: So viel Prozent des Pots könnte ein perfekter Gegenspieler im Schnitt gegen die Strategie gewinnen. Aktuell liegen alle River-Spots bei höchstens 0,1 % und alle Flop-Boards unter 0,01 % des Pots (im Rahmen des jeweiligen Modells). Die Werte stehen in den Daten und in jeder Analyse.
@@ -88,6 +82,6 @@ npm run solve     # alle vier Solver nacheinander, danach Build (etwa 5 bis 20 M
 
 ## Rechtliches
 
-Impressum, Datenschutzerklärung und Altershinweis sind in der App enthalten (Fußzeile). **Vor dem öffentlichen Betrieb müssen die gelb markierten Platzhalter im Impressum und in der Datenschutzerklärung (Abschnitt „RECHTLICHES“ in `src/index.html`) ausgefüllt werden.** Die Texte sind Vorlagen und keine Rechtsberatung.
+Impressum, Datenschutzerklärung und Altershinweis sind in der App enthalten (Fußzeile). **Vor dem öffentlichen Betrieb müssen die gelb markierten Platzhalter in `src/web/pages/Legal.jsx` ausgefüllt werden.** Die Texte sind Vorlagen und keine Rechtsberatung.
 
-Lizenz: Alle Rechte vorbehalten, siehe [LICENSE](LICENSE). Die eingebetteten Schriften stehen unter der SIL Open Font License 1.1 (`fonts/OFL-*.txt`).
+Lizenz: Alle Rechte vorbehalten, siehe [LICENSE](LICENSE). Die Schrift JetBrains Mono steht unter der SIL Open Font License 1.1 (`public/fonts/OFL-JetBrainsMono.txt`).

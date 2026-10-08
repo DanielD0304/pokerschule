@@ -4,7 +4,7 @@ import { evalCards, toArray, handName } from '../core/evaluator.js';
 import { exactEq } from '../core/equity.js';
 import { applyDecision, K_DIFF } from '../core/rating.js';
 import { fR } from '../core/hutree.js';
-import { state, persist, renderHeader, onReset } from './store.js';
+import { state, persist, renderHeader } from './store.js';
 import { track, saveMistake } from './progress.js';
 import { flopData } from './data.js';
 import { $, cardsHTML, BACKS, SLOT, nf, sg, pc1, strCards, ratingCard, evCards, logHTML, pushLog, worstOf, decisionBlock, mixText, mixMatrix, modelNote, analysis, pickW, sampleIndex } from './dom.js';
@@ -139,7 +139,6 @@ function finish() {
   analysis('fl-fb', `<p>Auf dem Flop hattest du <b>${pc1(eqR)}</b> Equity gegen die gesamte Range des Bots. EV-Werte gelten für die ganze Hand, inklusive der 2,5 BB, die du preflop investiert hast.</p>${blocks || '<p>In dieser Hand musstest du nichts entscheiden.</p>'}<p style="border-top:1px solid var(--line);padding-top:12px">${out}</p>${modelNote(model(H.B.expl))}`, 'Nächste Hand', newHand);
 }
 
-export function initFlop() {
+export function mountFlop() {
   render(); newHand();
-  onReset(() => { last = null; render(); newHand(); });
 }

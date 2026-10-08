@@ -1,7 +1,7 @@
 // Fehler-Training nach dem Leitner-System mit drei Boxen.
-import { state, persist, onReset } from './store.js';
+import { state, persist } from './store.js';
 import { track, onMistake, spotTitle, today } from './progress.js';
-import { onTab, showTab } from './tabs.js';
+import { go } from './nav.js';
 import { $, cardsHTML, SLOT, nf, sg, badge, modelNote } from './dom.js';
 import { QUAL } from '../core/rating.js';
 
@@ -34,9 +34,9 @@ export function reviewNew() {
   $('rq-fb').innerHTML = '';
   if (!current) {
     tb.innerHTML = `<span class="label">Keine offenen Fehler</span><p style="max-width:44ch">${RV().mastered ? 'Alles gemeistert. ' : ''}Sobald du in Arena, Duell, Flop oder River eine Ungenauigkeit, einen Fehler oder einen Patzer machst, landet die Situation hier zum Wiederholen.</p>`;
-    ac.innerHTML = '<button class="btn primary" data-go="arena">Zur Arena</button><button class="btn" data-go="flop">Zum Flop-Training</button>';
+    ac.innerHTML = '<button class="btn primary" data-go="/spielen/arena">Zur Arena</button><button class="btn" data-go="/training/flop">Zum Flop-Training</button>';
     pr.innerHTML = '';
-    ac.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => showTab(b.dataset.go); });
+    ac.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => go(b.dataset.go); });
     return;
   }
   const q = current;
@@ -72,10 +72,8 @@ function answer(k) {
   const nb = $('rq-next'); nb.onclick = reviewNew; nb.focus({ preventScroll: true });
 }
 
-export function initReview() {
+export function mountReview() {
   $('rq-filter').onchange = e => { filter = e.target.value; reviewNew(); };
-  onTab('review', () => { if (!current || $('rq-fb').innerHTML) reviewNew(); });
-  onMistake(renderHead);
-  onReset(() => { current = null; reviewNew(); });
+  current = null;
   reviewNew();
 }

@@ -4,7 +4,7 @@ import { eval7, best5, handName } from '../core/evaluator.js';
 import { mcEq } from '../core/equity.js';
 import { applyDecision, K_DIFF } from '../core/rating.js';
 import { evalSpot } from '../core/pushfold.js';
-import { state, persist, renderHeader, onReset } from './store.js';
+import { state, persist, renderHeader } from './store.js';
 import { track, saveMistake } from './progress.js';
 import { tables, bots } from './data.js';
 import { $, cardsHTML, BACKS, boardHTML, b1, sg, pc1, ratingCard, logHTML, pushLog, decisionBlock, modelNote, analysis, setButtons } from './dom.js';
@@ -152,7 +152,7 @@ function decide(a) {
     modelNote(MODEL));
 }
 
-export function initArena() {
+export function mountArena() {
   $('ar-newmatch').onclick = newMatch;
   const note = () => { const b = bots()[$('ar-bot').value]; $('ar-botnote').textContent = `Der ${b.short} ${b.note} Gilt ab dem nächsten Match.`; };
   $('ar-bot').onchange = note;
@@ -160,5 +160,4 @@ export function initArena() {
   if (mt) { $('ar-start').value = String(mt.start); $('ar-bot').value = mt.style; }
   note(); render();
   if (mt) { mt.sbMe = !mt.sbMe; mt.n--; newHand(); } else newMatch();
-  onReset(() => { lastDelta = null; render(); newMatch(); });
 }

@@ -2,7 +2,7 @@
 import { RANKS, SUITS, icard, cid, classOfInts } from '../core/cards.js';
 import { evalCards, handName, compare } from '../core/evaluator.js';
 import { applyDecision, K_DIFF } from '../core/rating.js';
-import { state, persist, renderHeader, onReset } from './store.js';
+import { state, persist, renderHeader } from './store.js';
 import { track, saveMistake } from './progress.js';
 import { riverData } from './data.js';
 import { $, cardsHTML, BACKS, nf, n2, sg, pc1, strCards, ratingCard, evCards, logHTML, pushLog, worstOf, decisionBlock, mixText, mixMatrix, modelNote, analysis, pickW, sampleIndex } from './dom.js';
@@ -119,7 +119,6 @@ function finish() {
   analysis('rv-fb', `<p>Deine Hand schlägt <b>${pc1(H.beat)}</b> der Range, mit der der Bot den River erreicht. EV-Werte gelten für die ganze Hand.</p>${blocks || '<p>In dieser Hand musstest du nichts entscheiden.</p>'}<p style="border-top:1px solid var(--line);padding-top:12px">${out}</p>${modelNote(model(H.sp.expl))}`, 'Nächste Hand', newHand);
 }
 
-export function initRiver() {
+export function mountRiver() {
   render(); newHand();
-  onReset(() => { last = null; render(); newHand(); });
 }

@@ -7,7 +7,7 @@ import { makeBots, evalSpot, lerp, REC_PUSH } from '../src/core/pushfold.js';
 import { makeHU, fR } from '../src/core/hutree.js';
 import { labelId, CMB } from '../src/core/cards.js';
 
-const read = f => JSON.parse(fs.readFileSync(new URL('../data/' + f, import.meta.url), 'utf8'));
+const read = f => JSON.parse(fs.readFileSync(new URL('../public/data/' + f, import.meta.url), 'utf8'));
 const pf = read('pf-data.json'), huStrat = read('hu-strat.json'), huTree = read('hu-tree.json');
 const flop = read('flop-data.json'), river = read('river-data.json');
 const T = makeTables(pf);
