@@ -14,6 +14,7 @@
     "preview": "vite preview",
     "test": "node --test --experimental-test-coverage --test-coverage-include=src/core/** --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=70 \"test/*.test.js\"",
     "test:fast": "node --test \"test/*.test.js\"",
+    "functions:sync": "node scripts/sync-functions.js",
     "solve:preflop": "node solver/precompute.js 30000",
     "solve:hu": "node solver/cfr.js 3000",
     "solve:flop": "node solver/flopsolve.js 1000",

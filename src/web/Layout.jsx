@@ -73,7 +73,7 @@ export default function Layout() {
           <Outlet />
           <footer className="foot">
             <p><b>18+</b> · Nur zum Lernen, kein Echtgeld. Glücksspiel kann süchtig machen. Hilfe und Beratung: <a href="https://www.check-dein-spiel.de" rel="noopener" target="_blank">check-dein-spiel.de</a> · BZgA-Telefon 0800 1 37 27 00 (kostenlos)</p>
-            <p><Link to="/impressum">Impressum</Link> · <Link to="/datenschutz">Datenschutz</Link> · <Link to="/lizenz">Lizenz</Link></p>
+            <p><Link to="/impressum">Impressum</Link> · <Link to="/datenschutz">Datenschutz</Link> · <Link to="/regeln">Nutzungsbedingungen</Link> · <Link to="/lizenz">Lizenz</Link></p>
           </footer>
         </div>
       </main>

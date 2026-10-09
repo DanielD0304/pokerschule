@@ -2,7 +2,7 @@
 
 Lernplattform für No-Limit Texas Hold'em nach dem Vorbild von chess.com: spielen gegen Bots, gezielt trainieren, lernen, und für jede Entscheidung eine Analyse gegen einen Solver. Bewertet wird, wie gut du entscheidest, nicht ob du die Hand gewinnst.
 
-Die Website ist eine React-App (Vite). Der Fortschritt liegt im Browser; mit einem freiwilligen Konto (Supabase) wird er auf allen Geräten synchronisiert. Spiel gegen Menschen folgt in einem späteren Schritt.
+Die Website ist eine React-App (Vite). Der Fortschritt liegt im Browser; mit einem freiwilligen Konto (Supabase) wird er auf allen Geräten synchronisiert, und man kann online gegen andere Menschen spielen.
 
 ## Bereiche
 
@@ -10,6 +10,7 @@ Die Website ist eine React-App (Vite). Der Fortschritt liegt im Browser; mit ein
 |---|---|
 | Start `/` | Empfehlung aus deinen Lecks, Ratings, Schnellstart |
 | Spielen `/spielen` | Push/Fold-Arena (Match gegen Freizeitspieler- oder Nash-Bot), Preflop-Duell mit 100 BB |
+| Online `/spielen/online` | Heads-up gegen Menschen (Push/Fold, Preflop-Duell), glücksbereinigtes Rating, Einladung per Link, Revanche, Analyse beider Spieler, Match-Verlauf |
 | Training `/training` | Flop, River (exakt gelöst), Fehler-Training, Quiz: Wer gewinnt?, Raise oder Fold?, Pot Odds |
 | Lernen `/lernen` | Ablauf einer Hand, Rangfolge, Open-Raise-Ranges |
 | Statistik `/statistik` | Ratings, Genauigkeit, größte Lecks, Aktivität, Sichern/Laden, Zurücksetzen |
@@ -44,11 +45,13 @@ src/core/           reine Logik ohne DOM, vollständig getestet
   rating.js           Bewertung einer Entscheidung, Elo-Rating
   storage.js          Speicherstand v2, Migration von v1, Export/Import
   sync.js             Zusammenführen zweier Stände (Gerät und Konto)
+  online.js           Online-Match: Regeln, Sicht je Platz, glücksbereinigtes Elo, Fair Play
   …                   Karten, Equity, Ranges, Pot Odds, Preflop, Push/Fold, Heads-up-Baum
 public/data/        Solver-Daten, werden erst geladen, wenn ein Modus sie braucht
 public/fonts/       JetBrains Mono (Zahlen) und ihre Lizenz; sonst Systemschrift
 solver/             Solver-Skripte
-supabase/           Datenbank-Schema mit Row Level Security und pgTAP-Tests
+supabase/           Datenbank-Schema mit Row Level Security, pgTAP-Tests, Edge Function „online“
+scripts/            sync-functions.js: kopiert die Kernlogik für die Edge Function
 test/               node:test-Suites
 ```
 
@@ -59,6 +62,10 @@ Die Seite ist statisch und läuft auf Vercel (`vercel.json`) oder Netlify (`netl
 ### Konten
 
 Konten sind optional. Ohne `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (siehe `.env.example`) ist die Funktion aus. Einrichtung: [docs/konten-einrichten.md](docs/konten-einrichten.md). Die Supabase-Bibliothek wird erst geladen, wenn jemand angemeldet ist oder die Konto-Seite öffnet; der Startdownload bleibt klein.
+
+### Online-Spiel
+
+Braucht Konten und zusätzlich die Edge Function `supabase/functions/online`, die als autoritativer Server mischt, austeilt und bewertet. Einrichtung und Funktionsweise: [docs/online-einrichten.md](docs/online-einrichten.md). Nach Änderungen an `src/core` oder `public/data` `npm run functions:sync` ausführen; die Tests prüfen, dass die Kopie für den Server aktuell ist.
 
 ### Speicherstand
 

@@ -28,6 +28,6 @@ export default function Leaderboard() {
       </table>
     </div>
     {!ins.overall && <p className="notice">Du erscheinst hier, sobald du bewertete Entscheidungen gesammelt hast, zum Beispiel in der <Link to="/spielen/arena">Arena</Link>.</p>}
-    <p className="notice">Die Referenzspieler stammen aus der Kalibrierung mit simulierten Spielern unterschiedlicher Stärke. Eine Rangliste mit echten Spielern kommt zusammen mit Konten und dem Online-Spiel.</p>
+    <p className="notice">Die Referenzspieler stammen aus der Kalibrierung mit simulierten Spielern unterschiedlicher Stärke. Eine Rangliste mit echten Spielern folgt; Online-Ratings gegen Menschen siehst du schon unter <Link to="/spielen/online">Online</Link>.</p>
   </>);
 }

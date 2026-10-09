@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useProgress } from '../useProgress.js';
+import { enabled as accountsOn } from '../../modes/account.js';
+import { useAccount } from './Account.jsx';
 import { IconPlay, IconTarget, IconBook, IconRepeat, IconUsers, IconCalc, IconGrid, IconLayers, IconSpade } from '../icons.jsx';
 
 function Tile({ to, icon: Icon, title, text, meta, disabled }) {
@@ -15,13 +17,14 @@ const Head = ({ title, text }) => <div className="page-head"><h1>{title}</h1><p>
 const chip = t => <span className="chip">{t}</span>;
 
 export function PlayHub() {
-  const s = useProgress();
+  const s = useProgress(), acc = useAccount(), online = acc.profile?.online || {};
   return (<>
-    <Head title="Spielen" text="Ganze Hände gegen Bots. Nach jeder Hand bekommst du eine Analyse wie in einer Partieanalyse beim Schach." />
+    <Head title="Spielen" text="Ganze Hände gegen Bots oder gegen Menschen. Nach jeder Hand oder jedem Match bekommst du eine Analyse wie in einer Partieanalyse beim Schach." />
     <div className="grid3">
       <Tile to="/spielen/arena" icon={IconPlay} title="Push/Fold-Arena" text="Heads-up-Match mit 10 bis 20 BB. Wähle den Freizeitspieler oder den Nash-Bot." meta={<>{chip(`Rating ${Math.round(s.arena.rating)}`)}{chip(`${s.arena.mw}:${s.arena.m - s.arena.mw} Matches`)}</>} />
       <Tile to="/spielen/duell" icon={IconSpade} title="Preflop-Duell, 100 BB" text="Raise, 3-Bet, 4-Bet oder Fold gegen das Solver-Gleichgewicht." meta={chip(`Rating ${Math.round(s.duel.rating)}`)} />
-      <Tile disabled icon={IconUsers} title="Online gegen Menschen" text="Spiel gegen andere Lernende mit glücksbereinigtem Rating. Kommt mit den Konten." meta={chip('Demnächst')} />
+      <Tile disabled={!accountsOn} to="/spielen/online" icon={IconUsers} title="Online gegen Menschen" text="Push/Fold oder Preflop-Duell gegen andere Lernende. Das Rating misst die Qualität deiner Entscheidungen, nicht das Kartenglück."
+        meta={!accountsOn ? chip('Braucht Konten') : !acc.user ? chip('Mit Konto') : <>{chip(`Push/Fold ${online.pf?.rating ?? 1000}`)}{chip(`Duell ${online.duel?.rating ?? 1000}`)}</>} />
     </div>
   </>);
 }

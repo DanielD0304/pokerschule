@@ -30,12 +30,17 @@ export function eloDelta(rating, n, { q, correct }, loss, gap, k) {
   return Math.round(K * ((correct ? 1 : 0) - expected(rating, difficulty(m, k))));
 }
 
-/** Verbucht eine Entscheidung im Modus-Zustand und gibt Bewertung und Rating-Änderung zurück. */
-export function applyDecision(ms, ev, chosen, k) {
+/** Bewertet die Wahl chosen unter den EVs ev: Einstufung, EV-Verlust, Abstand und Index der besten Option. */
+export function judge(ev, chosen) {
   const bestEV = Math.max(...ev), bi = ev.indexOf(bestEV);
   const others = ev.filter((_, x) => x !== bi);
   const loss = bestEV - ev[chosen], gap = others.length ? bestEV - Math.max(...others) : Infinity;
-  const g = grade(loss, gap);
+  return { ...grade(loss, gap), loss, gap, bi };
+}
+
+/** Verbucht eine Entscheidung im Modus-Zustand und gibt Bewertung und Rating-Änderung zurück. */
+export function applyDecision(ms, ev, chosen, k) {
+  const { loss, gap, bi, ...g } = judge(ev, chosen);
   const delta = eloDelta(ms.rating, ms.n, g, loss, gap, k);
   if (g.q !== 'eq') { ms.rating = Math.max(100, ms.rating + delta); ms.n++; }
   ms.accSum += accuracy(g.correct, loss); ms.accN++;

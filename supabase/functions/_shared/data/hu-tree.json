@@ -1,0 +1,16 @@
+{
+  "root":   {"p":"SB","a":["fold","raise"],"c":["t_sbFold","vsOpen"]},
+  "vsOpen": {"p":"BB","a":["fold","call","3bet"],"c":["t_bbFold","t_srp","vs3b"]},
+  "vs3b":   {"p":"SB","a":["fold","call","4bet"],"c":["t_sbFold3b","t_3bp","vs4b"]},
+  "vs4b":   {"p":"BB","a":["fold","call","jam"],"c":["t_bbFold4b","t_4bp","vsJam"]},
+  "vsJam":  {"p":"SB","a":["fold","call"],"c":["t_sbFoldJam","t_ai"]},
+  "t_sbFold":    {"t":"fold","sb":-0.5},
+  "t_bbFold":    {"t":"fold","sb":1},
+  "t_srp":       {"t":"sd","pot":5,"inv":2.5,"d":0.10},
+  "t_sbFold3b":  {"t":"fold","sb":-2.5},
+  "t_3bp":       {"t":"sd","pot":20,"inv":10,"d":0.05},
+  "t_bbFold4b":  {"t":"fold","sb":10},
+  "t_4bp":       {"t":"sd","pot":44,"inv":22,"d":0.02},
+  "t_sbFoldJam": {"t":"fold","sb":-22},
+  "t_ai":        {"t":"ai","pot":200,"inv":100}
+}

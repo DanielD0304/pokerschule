@@ -213,6 +213,15 @@ export function PublicProfile() {
       <div className="stat"><span className="k">Gesamt-Rating</span><span className="v">{p.rating ?? '–'}</span><span className="d">{p.rating ? levelOf(p.rating).name : 'noch keine Wertung'}</span></div>
       {MODES.map(m => <div key={m.k} className="stat"><span className="k">{m.name}</span><span className="v">{p.ratings?.[m.k] ?? '–'}</span><span className="d">{p.ratings?.[m.k] ? levelOf(p.ratings[m.k]).name : 'nicht gespielt'}</span></div>)}
     </div>
+    {(p.online?.pf || p.online?.duel) && (<>
+      <h2>Online gegen Menschen</h2>
+      <div className="arena-top">
+        {[['pf', 'Push/Fold'], ['duel', 'Preflop-Duell']].map(([k, label]) => p.online[k] && (
+          <div key={k} className="stat"><span className="k">{label}</span><span className="v">{p.online[k].rating}</span>
+            <span className="d">{p.online[k].games} {p.online[k].games === 1 ? 'Match' : 'Matches'}{p.online[k].games < 10 ? ', vorläufig' : ''}</span></div>
+        ))}
+      </div>
+    </>)}
     <p className="muted">{p.decisions} bewertete Entscheidungen. Ratings messen die Qualität der Entscheidungen gegen den Solver, nicht gewonnene Chips.</p>
   </>);
 }
