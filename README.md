@@ -2,7 +2,7 @@
 
 Lernplattform für No-Limit Texas Hold'em nach dem Vorbild von chess.com: spielen gegen Bots, gezielt trainieren, lernen, und für jede Entscheidung eine Analyse gegen einen Solver. Bewertet wird, wie gut du entscheidest, nicht ob du die Hand gewinnst.
 
-Die Website ist eine React-App (Vite) ohne Server. Der Fortschritt liegt im Browser; Konten und Spiel gegen Menschen folgen in einem späteren Schritt.
+Die Website ist eine React-App (Vite). Der Fortschritt liegt im Browser; mit einem freiwilligen Konto (Supabase) wird er auf allen Geräten synchronisiert. Spiel gegen Menschen folgt in einem späteren Schritt.
 
 ## Bereiche
 
@@ -14,6 +14,8 @@ Die Website ist eine React-App (Vite) ohne Server. Der Fortschritt liegt im Brow
 | Lernen `/lernen` | Ablauf einer Hand, Rangfolge, Open-Raise-Ranges |
 | Statistik `/statistik` | Ratings, Genauigkeit, größte Lecks, Aktivität, Sichern/Laden, Zurücksetzen |
 | Rangliste `/rangliste` | Deine Einordnung gegenüber Referenzspielern |
+| Konto `/konto` | Anmeldung per E-Mail-Link, Synchronisierung, Profil, Datenexport, Konto löschen |
+| Profil `/spieler/:name` | Öffentliches Profil (nur wenn eingeschaltet) |
 
 Jede Analyse nennt den EV aller Optionen, deinen EV-Verlust, eine Einstufung von „Bester Zug“ bis „Patzer“, den Strategie-Chart und das zugrunde liegende Modell mit seinen Grenzen.
 
@@ -41,16 +43,22 @@ src/core/           reine Logik ohne DOM, vollständig getestet
   evaluator.js        die einzige Handbewertung für App und Solver
   rating.js           Bewertung einer Entscheidung, Elo-Rating
   storage.js          Speicherstand v2, Migration von v1, Export/Import
+  sync.js             Zusammenführen zweier Stände (Gerät und Konto)
   …                   Karten, Equity, Ranges, Pot Odds, Preflop, Push/Fold, Heads-up-Baum
 public/data/        Solver-Daten, werden erst geladen, wenn ein Modus sie braucht
 public/fonts/       JetBrains Mono (Zahlen) und ihre Lizenz; sonst Systemschrift
 solver/             Solver-Skripte
+supabase/           Datenbank-Schema mit Row Level Security und pgTAP-Tests
 test/               node:test-Suites
 ```
 
 ### Hosting
 
 Die Seite ist statisch und läuft auf Vercel (`vercel.json`) oder Netlify (`netlify.toml`); beide Dateien leiten alle Pfade auf `index.html` um, damit Unterseiten auch beim direkten Aufruf funktionieren. Repository einmal im Dashboard des Anbieters verbinden; danach baut jeder Push automatisch.
+
+### Konten
+
+Konten sind optional. Ohne `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` (siehe `.env.example`) ist die Funktion aus. Einrichtung: [docs/konten-einrichten.md](docs/konten-einrichten.md). Die Supabase-Bibliothek wird erst geladen, wenn jemand angemeldet ist oder die Konto-Seite öffnet; der Startdownload bleibt klein.
 
 ### Speicherstand
 

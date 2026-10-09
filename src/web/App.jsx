@@ -7,6 +7,7 @@ import { PlayHub, TrainHub, LearnHub, Basics } from './pages/Hubs.jsx';
 import Stats from './pages/Stats.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import { Impressum, Datenschutz, Lizenz } from './pages/Legal.jsx';
+import Account, { PublicProfile } from './pages/Account.jsx';
 import { setNavigator } from '../modes/nav.js';
 import { NEEDS } from '../modes/data.js';
 import * as M from './markup.js';
@@ -59,6 +60,8 @@ export default function App() {
         <Route path="lernen/ranges" element={<ModePage back={LERNEN} title="Open-Raise-Ranges" intro="Welche Hände du im 6-max von welcher Position eröffnest."><ModeHost html={M.RANGES} mount={mountRanges} /></ModePage>} />
         <Route path="statistik" element={<Stats />} />
         <Route path="rangliste" element={<Leaderboard />} />
+        <Route path="konto" element={<Account />} />
+        <Route path="spieler/:name" element={<PublicProfile />} />
         <Route path="impressum" element={<Impressum />} />
         <Route path="datenschutz" element={<Datenschutz />} />
         <Route path="lizenz" element={<Lizenz />} />

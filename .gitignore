@@ -4,3 +4,6 @@ dist/
 Thumbs.db
 *.log
 coverage/
+.env
+.env.local
+supabase/.temp/

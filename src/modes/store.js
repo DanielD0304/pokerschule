@@ -22,11 +22,13 @@ export function resetAll() {
   const d = defaults(), ageOk = state.ui.ageOk;
   for (const k of Object.keys(d)) state[k] = d[k];
   state.ui.ageOk = ageOk;
+  state.sync.epoch = Date.now();
   persist();
 }
-/** Ersetzt den kompletten Stand (Import). */
-export function replaceState(next) {
+/** Ersetzt den kompletten Stand (Import). Mit fresh = false (Synchronisierung) bleibt die Epoche des neuen Stands. */
+export function replaceState(next, { fresh = true } = {}) {
   for (const k of Object.keys(state)) delete state[k];
   Object.assign(state, next);
+  if (fresh) state.sync = { ...state.sync, epoch: Date.now() };
   persist();
 }
