@@ -32,12 +32,36 @@ export function Datenschutz() {
       </ul>
       <p>Wir erheben keinen Klarnamen, kein Geburtsdatum und keine Zahlungsdaten. Zweck ist, deinen Fortschritt auf mehreren Geräten bereitzustellen (Art. 6 Abs. 1 lit. b DSGVO, Nutzungsvertrag). Beim Anlegen bestätigst du, mindestens 18 Jahre alt zu sein.</p>
       <p>Die Daten liegen bei <Ph>[Supabase, Inc., 970 Toa Payoh North #07-04, Singapur 318992]</Ph> in einem Rechenzentrum in der EU (Frankfurt am Main). Mit Supabase besteht ein Auftragsverarbeitungsvertrag; für mögliche Zugriffe aus Drittländern gelten <Ph>[Standardvertragsklauseln / Angaben prüfen]</Ph>. Damit du angemeldet bleibst, legt die Website ein Anmelde-Token im lokalen Speicher deines Browsers ab.</p>
+      <h2>Online-Spiel (freiwillig)</h2>
+      <p>Wenn du online gegen andere spielst, verarbeiten wir zusätzlich: deine Aktionen und Bedenkzeiten in jedem Match, die ausgeteilten Karten, die Bewertung jeder Entscheidung, dein Online-Rating und Lebenszeichen deines Browsers während eines Matches (um Verbindungsabbrüche zu erkennen). Dein Gegner sieht deinen Anzeigenamen, dein Online-Rating und nach dem Match die Analyse aller Entscheidungen beider Spieler. Online-Rating und Bilanz stehen in deinem Profil und sind öffentlich, wenn dein Profil öffentlich ist.</p>
+      <p>Um Hilfe durch Solver-Programme zu erkennen, werten wir Spielqualität und Gleichmäßigkeit der Bedenkzeiten deiner letzten Matches automatisch aus. Ein auffälliges Ergebnis führt nur zu einer Markierung, die der Betreiber prüft; gesperrt wird nur nach dieser Prüfung. Meldungen anderer Spieler über dich und deine Meldungen werden ebenfalls gespeichert. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Nutzungsvertrag, faire Wertung) und für die Fair-Play-Auswertung Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem fairen Rating).</p>
+      <p>Wenn du dein Konto löschst, wird dein Name in den Matches deiner Gegner durch „Gelöschtes Konto“ ersetzt; deren Analyse bleibt für sie erhalten.</p>
       <p><b>Speicherdauer und Löschung:</b> Die Daten bleiben gespeichert, bis du dein Konto löschst. Unter „Konto“ kannst du jederzeit alle Kontodaten als Datei herunterladen und das Konto selbst löschen. Dabei werden alle Daten sofort entfernt; Sicherungskopien des Anbieters laufen nach spätestens 30 Tagen aus.</p>
       <h2>Hosting</h2>
       <p>Die Website wird über <Ph>[Hosting-Anbieter, z. B. Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA, oder Netlify, Inc.]</Ph> ausgeliefert. Beim Abruf verarbeitet der Anbieter technisch notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit und die abgerufene Datei in Server-Logs. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt in der sicheren und stabilen Auslieferung der Website. Mit dem Anbieter besteht <Ph>[ein Auftragsverarbeitungsvertrag / Angaben zur Übermittlung in Drittländer]</Ph>. Einzelheiten stehen in der Datenschutzerklärung des Anbieters.</p>
       <h2>Deine Rechte</h2>
       <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht auf Beschwerde bei einer Datenschutz-Aufsichtsbehörde. Deine lokal gespeicherten Daten löschst du jederzeit selbst unter „Statistik“ → „Fortschritt zurücksetzen“ oder über die Einstellungen deines Browsers.</p>
       <p className="muted">Stand: <Ph>[Datum]</Ph></p>
+    </div>
+  );
+}
+
+export function Regeln() {
+  return (
+    <div className="legal">
+      <h1>Nutzungsbedingungen und Fair Play</h1>
+      <h2>Kein Glücksspiel</h2>
+      <p>Die Pokerschule ist ein Lernprogramm. Es gibt keine Einsätze, keine Gewinne mit Geldwert und keine Verbindung zu Pokeranbietern. Chips und Ratings haben keinen Geldwert und lassen sich nicht übertragen oder verkaufen. Die Nutzung ist erst ab 18 Jahren erlaubt.</p>
+      <h2>Online-Spiel</h2>
+      <ul>
+        <li>Spiel selbst. Hilfe durch Solver, Tabellen, andere Programme oder andere Personen während eines Matches ist verboten.</li>
+        <li>Keine absichtlichen Verzögerungen, kein Absprechen von Ergebnissen, kein Spielen gegen eigene Zweitkonten.</li>
+        <li>Anzeigenamen dürfen niemanden beleidigen, keine Marken von Pokeranbietern enthalten und sich nicht als andere Person ausgeben.</li>
+        <li>Wer aufgibt oder länger als 60 Sekunden nicht verbunden ist, verliert das Match. Läuft die Bedenkzeit ab, zählt die Hand als Fold.</li>
+      </ul>
+      <h2>Prüfung und Sperren</h2>
+      <p>Auffällige Spielmuster werden automatisch markiert und vom Betreiber geprüft, ebenso Meldungen anderer Spieler. Bei Verstößen kann der Betreiber ein Konto vom Online-Spiel ausschließen. Wenn du eine Sperre für einen Fehler hältst, schreib an die Adresse im <a href="/impressum">Impressum</a>.</p>
+      <p className="muted">Stand: <Ph>[Datum]</Ph>. Vorlage, keine Rechtsberatung; vor dem Start rechtlich prüfen lassen.</p>
     </div>
   );
 }

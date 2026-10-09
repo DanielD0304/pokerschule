@@ -95,3 +95,20 @@ sequenceDiagram
 - Aufwand: 5–7 Wochen.
 - Risiko leere Warteschlange: Anfangs zu wenige Spieler → bei mehr als 30 s Wartezeit „Gegen Bot weiterspielen“ anbieten.
 - Risiko Kosten: Realtime-Verbindungen sind im Free-Tarif begrenzt (200 gleichzeitig).
+
+## Stand der Umsetzung
+
+Umgesetzt am 10. Oktober 2026, Einrichtung: [../online-einrichten.md](../online-einrichten.md).
+
+| Punkt | Stand |
+|---|---|
+| Formate Push/Fold (10, 15, 20 BB) und Preflop-Duell (100 BB, 10 Hände) | umgesetzt |
+| Matchmaking nach Rating mit wachsendem Fenster, Wartezeit, Abbruch, nach 30 s Hinweis auf den Bot | umgesetzt |
+| Bedenkzeit 20 s + 30 s Zeitbank, Fold bei Ablauf | umgesetzt |
+| Autoritativer Server (Edge Function `online`), Hash vorher, Deck nachher, Nachprüfen im Browser | umgesetzt |
+| Analyse beider Spieler, glücksbereinigtes Elo, Chip-Ergebnis getrennt | umgesetzt |
+| Freunde per Link einladen, Revanche, Match-Verlauf | umgesetzt |
+| Verbindungsabbruch: 60 s, danach aufgegeben | umgesetzt |
+| Fair Play: automatische Markierung, Melden, Sperren durch den Betreiber, Nutzungsbedingungen | umgesetzt |
+| Postflop-Format, Turniere | offen (Kann) |
+| Rechtliche Prüfung vor dem Start, Antwortzeit unter 300 ms messen | offen, erst mit echtem Projekt möglich |

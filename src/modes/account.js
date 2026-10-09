@@ -227,7 +227,7 @@ export async function deleteAccount() {
 /** Öffentliches Profil nach Anzeigename (für /spieler/:name). */
 export async function publicProfile(name) {
   const sb = await client();
-  return check(await sb.from('profiles').select('display_name, avatar, rating, ratings, decisions, created_at').ilike('display_name', name.replace(/[%_\\]/g, c => '\\' + c)).eq('is_public', true).maybeSingle());
+  return check(await sb.from('profiles').select('display_name, avatar, rating, ratings, decisions, online, created_at').ilike('display_name', name.replace(/[%_\\]/g, c => '\\' + c)).eq('is_public', true).maybeSingle());
 }
 
 /** Lokale Sicherung vom ersten Verbinden, falls vorhanden. */
@@ -260,3 +260,12 @@ export function initAccount() {
 }
 /** Lädt die Bibliothek, damit die Konto-Seite den Anmeldestatus kennt. */
 export const ensureClient = () => enabled && client();
+/** Der Supabase-Client für andere Module (Online-Spiel). */
+export const supabase = () => client();
+/** Liest das eigene Profil neu (z. B. nach einem Online-Match mit neuem Rating). */
+export async function refreshProfile() {
+  const uid = status.user?.id; if (!uid) return;
+  const sb = await client();
+  const profile = check(await sb.from('profiles').select('*').eq('id', uid).maybeSingle());
+  if (profile) set({ profile });
+}

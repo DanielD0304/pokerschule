@@ -6,8 +6,9 @@ import Home from './pages/Home.jsx';
 import { PlayHub, TrainHub, LearnHub, Basics } from './pages/Hubs.jsx';
 import Stats from './pages/Stats.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
-import { Impressum, Datenschutz, Lizenz } from './pages/Legal.jsx';
+import { Impressum, Datenschutz, Lizenz, Regeln } from './pages/Legal.jsx';
 import Account, { PublicProfile } from './pages/Account.jsx';
+import Online, { MatchPage } from './pages/Online.jsx';
 import { setNavigator } from '../modes/nav.js';
 import { NEEDS } from '../modes/data.js';
 import * as M from './markup.js';
@@ -47,6 +48,8 @@ export default function App() {
         <Route path="spielen" element={<PlayHub />} />
         <Route path="spielen/arena" element={<ModePage back={SPIELEN} title="Push/Fold-Arena" intro="Heads-up-Match mit kurzen Stacks: Ihr startet mit gleich vielen Chips und spielt, bis einer pleite ist. Bewertet wird deine Entscheidung, nicht das Ergebnis."><ModeHost html={M.ARENA} mount={mountArena} needs={NEEDS.arena} /></ModePage>} />
         <Route path="spielen/duell" element={<ModePage back={SPIELEN} title="Preflop-Duell, 100 BB" intro="Heads-up mit tiefen Stacks gegen das Solver-Gleichgewicht: Raises, 3-Bets, 4-Bets. Nach jeder Hand bekommst du die Analyse."><ModeHost html={M.DUEL} mount={mountDuel} needs={NEEDS.duel} /></ModePage>} />
+        <Route path="spielen/online" element={<Online />} />
+        <Route path="spielen/online/match/:id" element={<MatchPage />} />
         <Route path="training" element={<TrainHub />} />
         <Route path="training/flop" element={<ModePage back={TRAINING} title="Flop-Training" intro="Single-Raised-Pot, 100 BB: Der Small Blind hat erhöht, der Big Blind gecallt. Du spielst abwechselnd beide Seiten auf 12 typischen Flops."><ModeHost html={M.FLOP} mount={mountFlop} needs={NEEDS.flop} /></ModePage>} />
         <Route path="training/river" element={<ModePage back={TRAINING} title="River-Training" intro="Die letzte Setzrunde, exakt gelöst: Value-Bets, Bluffs, Bluff-Catcher und Einsatzgrößen bis zum Overbet."><ModeHost html={M.RIVER} mount={mountRiver} needs={NEEDS.river} /></ModePage>} />
@@ -65,6 +68,7 @@ export default function App() {
         <Route path="impressum" element={<Impressum />} />
         <Route path="datenschutz" element={<Datenschutz />} />
         <Route path="lizenz" element={<Lizenz />} />
+        <Route path="regeln" element={<Regeln />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
