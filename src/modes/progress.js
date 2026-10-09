@@ -19,6 +19,10 @@ export const SPOTNAME = {
 };
 export const spotTitle = k => SPOTNAME[k] ? SPOTNAME[k][0] + ' · ' + SPOTNAME[k][1] : k;
 
+const decisionListeners = new Set();
+/** Meldet jede gezählte Entscheidung (für die Synchronisierung mit dem Konto). */
+export const onDecision = fn => { decisionListeners.add(fn); return () => decisionListeners.delete(fn); };
+
 /** Zählt eine Entscheidung für Tagesaktivität und (außer Quiz und Wiederholung) für die Situations-Statistik. */
 export function track(mode, node, q, loss) {
   const dash = state.dash, t = today(), d = dash.days[t] || (dash.days[t] = { n: 0, ok: 0 });
@@ -28,6 +32,7 @@ export function track(mode, node, q, loss) {
     s.n++; s.loss += Math.max(0, loss || 0); if (!GOOD.has(q)) s.wrong++;
   }
   persist();
+  decisionListeners.forEach(fn => fn({ mode, spot: mode + ':' + node, q, loss: Math.max(0, loss || 0) }));
 }
 
 const mistakeListeners = [];

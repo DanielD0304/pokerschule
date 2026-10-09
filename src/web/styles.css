@@ -275,3 +275,21 @@ mark.ph { background: color-mix(in srgb, var(--gold) 30%, transparent); color: v
 .rating-row:hover { text-decoration: none; background: color-mix(in srgb, var(--fg) 3%, transparent); }
 .rating-row b { font-family: var(--f-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 860px) { .grid2[style] { grid-template-columns: 1fr !important; } }
+
+/* ---------- Konto ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; font-size: .9rem; font-weight: 560; max-width: 420px; }
+.field input { font: inherit; font-size: 1rem; font-weight: 400; padding: 10px 12px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--fg); width: 100%; }
+.field .hint { font-weight: 400; color: var(--muted); font-size: .82rem; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: .92rem; max-width: 68ch; }
+.check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.form-msg { font-size: .9rem; }
+.form-msg.bad { color: var(--bad); }
+.sync { display: inline-flex; align-items: center; gap: 6px; }
+.sync::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+.sync.ok::before { background: var(--good); }
+.sync.busy::before { background: var(--gold); }
+.sync.bad::before { background: var(--bad); }
+.avatars { display: flex; gap: 8px; flex-wrap: wrap; }
+.avatars button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--surface); font-size: 22px; cursor: pointer; color: var(--fg); }
+.avatars button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.avatar-big { width: 64px; height: 64px; border-radius: 16px; background: var(--accent-soft); display: grid; place-items: center; font-size: 34px; }

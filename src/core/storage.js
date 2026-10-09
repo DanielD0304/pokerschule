@@ -20,6 +20,8 @@ export function defaults() {
     dash: { spots: {}, days: {} },
     review: { items: [], mastered: 0, seq: 0, today: null },
     ui: { tab: null, ageOk: false },
+    // epoch: Zeitpunkt des letzten Zurücksetzens oder Imports; beim Zusammenführen gewinnt der neuere Stand ganz
+    sync: { epoch: 0 },
   };
 }
 

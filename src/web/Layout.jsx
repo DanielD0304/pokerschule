@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { useProgress } from './useProgress.js';
 import { persist } from '../modes/store.js';
 import { insights } from '../modes/insights.js';
+import { enabled as accountsOn } from '../modes/account.js';
+import { useAccount, syncLabel, AVATARS } from './pages/Account.jsx';
 import { IconHome, IconPlay, IconTarget, IconBook, IconChart, IconTrophy, IconSpade } from './icons.jsx';
 
 const NAV = [
@@ -14,6 +16,20 @@ const NAV = [
   { to: '/rangliste', label: 'Rangliste', icon: IconTrophy },
 ];
 const TABBAR = NAV.filter(n => n.to !== '/rangliste');
+
+/** „Anmelden“ bzw. Anzeigename mit Sicherungsstatus; nur, wenn Konten eingerichtet sind. */
+function AccountLink({ compact }) {
+  const s = useAccount();
+  if (!accountsOn) return null;
+  const [cls, label] = syncLabel(s);
+  if (!s.user) return <Link to="/konto" className={compact ? 'chip' : 'rating-pill'}>{s.phase === 'loading' ? 'Konto …' : 'Anmelden'}</Link>;
+  const name = s.profile?.display_name || 'Konto', av = AVATARS[s.profile?.avatar];
+  return (
+    <Link to="/konto" className={compact ? 'chip' : 'rating-pill'} aria-label={`Konto ${name}${label ? ', ' + label : ''}`} title={label}>
+      <span className={'sync ' + cls}>{av ? av + ' ' : ''}{name}</span>
+    </Link>
+  );
+}
 
 function Brand() {
   return <Link to="/" className="brand"><span className="brand-mark"><IconSpade /></span>Pokerschule</Link>;
@@ -35,6 +51,7 @@ export default function Layout() {
           </NavLink>
         ))}
         <div className="sidebar-foot">
+          <AccountLink />
           <Link to="/statistik" className="rating-pill" aria-label="Gesamt-Rating">
             <span>Gesamt-Rating</span><b>{ins.overall ?? '–'}</b>
           </Link>
@@ -43,7 +60,7 @@ export default function Layout() {
         </div>
       </nav>
 
-      <header className="topbar"><Brand /><Link to="/statistik" className="chip">Rating <b>{ins.overall ?? '–'}</b></Link></header>
+      <header className="topbar"><Brand /><span style={{ display: 'flex', gap: 8 }}><AccountLink compact /><Link to="/statistik" className="chip">Rating <b>{ins.overall ?? '–'}</b></Link></span></header>
 
       <main className="main" id="inhalt">
         <div className="page" key={loc.pathname}>
