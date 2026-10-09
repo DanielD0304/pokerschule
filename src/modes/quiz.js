@@ -3,7 +3,7 @@ import { parse, deck, labelOf } from '../core/cards.js';
 import { best5, compare, handName } from '../core/evaluator.js';
 import { expand, pct, cellLabel } from '../core/ranges.js';
 import { makeScenario, ruleOfThumb } from '../core/potodds.js';
-import { state, persist, renderHeader, onReset } from './store.js';
+import { state, persist } from './store.js';
 import { track } from './progress.js';
 import { $, cardHTML, cardsHTML, pc1, b1, modelNote } from './dom.js';
 
@@ -43,7 +43,7 @@ function record(k, ok) {
   track('quiz', k, ok ? 'best' : 'blun', 0);
   q[k].t++;
   if (ok) { q[k].c++; q.streak++; q.best = Math.max(q.best, q.streak); } else q.streak = 0;
-  persist(); renderHeader();
+  persist();
 }
 function setActions(id, on) { document.querySelectorAll('#' + id + ' button').forEach(b => { b.disabled = !on; }); }
 function feedback(id, ok, head, body, next) {
@@ -117,14 +117,24 @@ function renderRange() {
   $('range-desc').textContent = p.desc;
 }
 
-export function initQuiz() {
+export function mountRanking() {
   $('ranking').innerHTML = RK.map((r, i) => `<div class="rk"><span class="n">${i + 1}</span><span class="t"><b>${r[0]}</b><small>${r[1]}</small></span><div class="row">${parse(r[2]).map(c => cardHTML(c, 'sm')).join('')}</div></div>`).join('');
+}
+export function mountShow() {
   document.querySelectorAll('#show-actions button').forEach(b => { b.onclick = () => answerShow(b.dataset.a); });
+  newShow();
+}
+export function mountPre() {
   document.querySelectorAll('#pre-actions button').forEach(b => { b.onclick = () => answerPre(b.dataset.a); });
+  newPre();
+}
+export function mountOdds() {
   document.querySelectorAll('#odds-actions button').forEach(b => { b.onclick = () => answerOdds(b.dataset.a); });
+  newOdds();
+}
+export function mountRanges() {
   const sel = $('range-pos');
   sel.innerHTML = Object.entries(POS).map(([k, p]) => `<option value="${k}">${p.name}</option>`).join('');
   sel.onchange = renderRange;
-  renderRange(); newShow(); newPre(); newOdds();
-  onReset(renderHeader);
+  renderRange();
 }

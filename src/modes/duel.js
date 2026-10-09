@@ -4,7 +4,7 @@ import { eval7, best5, handName } from '../core/evaluator.js';
 import { mcEq } from '../core/equity.js';
 import { applyDecision, K_DIFF } from '../core/rating.js';
 import { fR } from '../core/hutree.js';
-import { state, persist, renderHeader, onReset } from './store.js';
+import { state, persist, renderHeader } from './store.js';
 import { track, saveMistake } from './progress.js';
 import { hu } from './data.js';
 import { $, cardsHTML, BACKS, boardHTML, nf, sg, pc1, ratingCard, evCards, logHTML, pushLog, worstOf, decisionBlock, mixText, mixMatrix, modelNote, analysis, sampleIndex } from './dom.js';
@@ -103,7 +103,6 @@ function finish() {
   analysis('du-fb', `${blocks || '<p>In dieser Hand musstest du nichts entscheiden.</p>'}<p style="border-top:1px solid var(--line);padding-top:12px">${out}</p>${modelNote(MODEL)}`, 'Nächste Hand', newHand);
 }
 
-export function initDuel() {
+export function mountDuel() {
   render(); newHand();
-  onReset(() => { last = null; render(); newHand(); });
 }

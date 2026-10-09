@@ -4,15 +4,8 @@ Der Quellcode, die Solver-Daten und alle Inhalte dieses Repositorys dürfen ohne
 vorherige schriftliche Zustimmung des Rechteinhabers weder vervielfältigt,
 verändert, verbreitet noch öffentlich zugänglich gemacht werden.
 
-Ausnahme: Schriften von Dritten
--------------------------------
-Die Schriftdateien im Ordner fonts/ (Young Serif, Figtree, JetBrains Mono) sind
-nicht Teil dieses Vorbehalts. Sie stehen unter der SIL Open Font License,
-Version 1.1. Die jeweiligen Lizenztexte liegen daneben:
-
-  fonts/OFL-YoungSerif.txt
-  fonts/OFL-Figtree.txt
-  fonts/OFL-JetBrainsMono.txt
-
-Der Build bettet diese Schriften in dist/index.html ein; für die eingebetteten
-Schriften gilt weiterhin die SIL Open Font License 1.1.
+Ausnahme: Schrift von Dritten
+-----------------------------
+Die Schriftdatei public/fonts/jetbrainsmono-500-latin.woff2 (JetBrains Mono)
+ist nicht Teil dieses Vorbehalts. Sie steht unter der SIL Open Font License,
+Version 1.1; der Lizenztext liegt in public/fonts/OFL-JetBrainsMono.txt.

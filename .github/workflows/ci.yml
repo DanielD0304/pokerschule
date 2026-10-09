@@ -17,7 +17,5 @@ jobs:
       - run: npm ci
       - name: Tests mit Abdeckung (Kernlogik mindestens 80 %)
         run: npm test
-      - name: Build
+      - name: Build der Website
         run: npm run build
-      - name: Eingechecktes Build-Ergebnis ist aktuell
-        run: git diff --exit-code dist/index.html

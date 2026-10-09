@@ -30,7 +30,7 @@ function confirmImport(text) {
   $('bk-yes').focus();
 }
 
-export function initBackup() {
+export function mountBackup() {
   $('bk-export').onclick = download;
   $('bk-show').onclick = () => { showText(); $('bk-area').focus(); };
   $('bk-copy').onclick = () => {
