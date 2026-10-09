@@ -1,29 +1,10 @@
-// River-Solver (CFR+), exakt: Ranges aus dem Flop-Solver (SB C-Bet, BB Call, Turn Check-Check)
-const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
-const fs = require('fs');
-const RANKS = '23456789TJQKA', SUITS = 'shdc';
-const card = s => RANKS.indexOf(s[0]) * 4 + SUITS.indexOf(s[1]);
-const cstr = c => RANKS[c >> 2] + SUITS[c & 3];
-
-const STR = new Int8Array(8192), PC = new Uint8Array(8192);
-for (let m = 0; m < 8192; m++) { const ext = (m << 1) | ((m >> 12) & 1); let h = -1; for (let t = 13; t >= 4; t--) if (((ext >> (t - 4)) & 31) === 31) { h = t - 1; break; } STR[m] = h; let c = 0, x = m; while (x) { x &= x - 1; c++; } PC[m] = c; }
-const _c = new Int8Array(13), _s = new Int32Array(4);
-const top = (mask, n) => { let v = 0, k = 0; for (let r = 12; r >= 0 && k < n; r--) if (mask & (1 << r)) { v = (v << 4) | r; k++; } return v << (4 * (5 - n)); };
-function eval7(c) {
-  _c.fill(0); _s.fill(0); let rm = 0;
-  for (let k = 0; k < 7; k++) { const r = c[k] >> 2; _c[r]++; _s[c[k] & 3] |= 1 << r; rm |= 1 << r; }
-  let fl = 0; for (let s = 0; s < 4; s++) if (PC[_s[s]] >= 5) { const sf = STR[_s[s]]; if (sf >= 0) return (8 << 20) | sf; fl = _s[s]; }
-  let q = -1, t1 = -1, t2 = -1, p1 = -1, p2 = -1;
-  for (let r = 12; r >= 0; r--) { const n = _c[r]; if (n === 4) q = r; else if (n === 3) { if (t1 < 0) t1 = r; else t2 = r; } else if (n === 2) { if (p1 < 0) p1 = r; else if (p2 < 0) p2 = r; } }
-  if (q >= 0) return (7 << 20) | (q << 16) | top(rm & ~(1 << q), 1);
-  if (t1 >= 0 && (t2 >= 0 || p1 >= 0)) return (6 << 20) | (t1 << 16) | (Math.max(t2, p1) << 12);
-  if (fl) return (5 << 20) | top(fl, 5);
-  const st = STR[rm]; if (st >= 0) return (4 << 20) | st;
-  if (t1 >= 0) return (3 << 20) | (t1 << 16) | (top(rm & ~(1 << t1), 2) >> 4);
-  if (p2 >= 0) return (2 << 20) | (p1 << 16) | (p2 << 12) | (top(rm & ~(1 << p1) & ~(1 << p2), 1) >> 8);
-  if (p1 >= 0) return (1 << 20) | (p1 << 16) | (top(rm & ~(1 << p1), 3) >> 4);
-  return top(rm, 5);
-}
+// River-Solver (CFR+), exakt: Ranges aus dem Flop-Solver (SB C-Bet, BB Call, Turn Check-Check).
+// Aufruf: node solver/riversolve.js [iter]   liest data/flop-data.json → data/river-data.json
+import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
+import fs from 'node:fs';
+import { cardFromStr as card, cardStr as cstr } from '../src/core/cards.js';
+import { eval7 } from '../src/core/evaluator.js';
+import { DATA_DIR } from './paths.js';
 
 // Baum relativ zum Pot P, Einsatz pro Spieler vor dem River I0 = P/2
 function buildTree(P) {
@@ -110,7 +91,7 @@ function solve({ spot, N }) {
   const gainS = brS.reduce((x, v, s) => x + rs0[s] * v, 0) - eqS.reduce((x, v, s) => x + rs0[s] * v, 0);
   const gainB = brB.reduce((x, v, b) => x + rb0[b] * v, 0) - eqB.reduce((x, v, b) => x + rb0[b] * v, 0);
   const expl = (gainS + gainB) / 2 / tot / P * 100; // % des Pots
-  const out = { board: boardStr + cstr(turn) + cstr(river), P, line, tree: TREE,
+  const out = { board: boardStr + cstr(turn) + cstr(river), P, line, tree: TREE, expl: +expl.toFixed(3),
     sb: { c: S.map(([a, b]) => a * 52 + b), w: SW.map(w => Math.round(w * 1000)) }, bb: { c: B.map(([a, b]) => a * 52 + b), w: BW.map(w => Math.round(w * 1000)) }, n: {} };
   for (const [id, n] of Object.entries(TREE)) if (!n.t) { const m = n.p === 'SB' ? nS : nB, A = n.a.length, sg = sigma(id, m, A, true);
     out.n[id] = { s: Array.from(sg, v => Math.round(v * 100)), e: Array.from(EVS[id], v => Math.round(v * 100)) }; }
@@ -125,7 +106,7 @@ function solve({ spot, N }) {
 if (!isMainThread) parentPort.postMessage(solve(workerData));
 else {
   const N = +process.argv[2] || 1500, t0 = Date.now();
-  const FD = JSON.parse(fs.readFileSync(__dirname + '/flop-data.json', 'utf8'));
+  const FD = JSON.parse(fs.readFileSync(DATA_DIR + '/flop-data.json', 'utf8'));
   let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
   const spots = [];
   for (const B of FD.boards) {
@@ -143,10 +124,10 @@ else {
       spots.push({ boardStr: B.board, turn: t, river: rv, sbW, bbW, combos, P, line: big ? 'b75' : 'b33' });
     }
   }
-  Promise.all(spots.map(spot => new Promise((ok, no) => { const w = new Worker(__filename, { workerData: { spot, N } }); w.on('message', ok); w.on('error', no); })))
+  Promise.all(spots.map(spot => new Promise((ok, no) => { const w = new Worker(new URL(import.meta.url), { workerData: { spot, N } }); w.on('message', ok); w.on('error', no); })))
     .then(res => {
       for (const r of res) console.log(r.out.board, 'P', r.out.P, 'nS', r.nS, 'nB', r.nB, 'expl', r.expl.toFixed(2) + '%pot', JSON.stringify(r.freq));
-      fs.writeFileSync(__dirname + '/river-data.json', JSON.stringify({ spots: res.map(r => r.out) }));
-      console.log('fertig', (Date.now() - t0) / 1000, 's', fs.statSync(__dirname + '/river-data.json').size, 'bytes');
+      fs.writeFileSync(DATA_DIR + '/river-data.json', JSON.stringify({ spots: res.map(r => r.out) }));
+      console.log('fertig', (Date.now() - t0) / 1000, 's', fs.statSync(DATA_DIR + '/river-data.json').size, 'bytes');
     });
 }

@@ -1,53 +1,87 @@
 # Pokerschule
 
-Ein Trainer für No-Limit Texas Hold'em, der dich von den Grundlagen bis zum River führt. Bewertet wird, wie gut du entscheidest, nicht ob du die Hand gewinnst – ähnlich wie die Analyse bei chess.com.
+Lernplattform für No-Limit Texas Hold'em nach dem Vorbild von chess.com: spielen gegen Bots, gezielt trainieren, lernen, und für jede Entscheidung eine Analyse gegen einen Solver. Bewertet wird, wie gut du entscheidest, nicht ob du die Hand gewinnst.
 
-Die ganze App ist eine einzige Datei: `index.html`. Sie braucht keinen Server und keinen Build-Schritt. Öffne sie im Browser.
+Die Website ist eine React-App (Vite) ohne Server. Der Fortschritt liegt im Browser; Konten und Spiel gegen Menschen folgen in einem späteren Schritt.
 
 ## Bereiche
 
-| Tab | Inhalt |
+| Seite | Inhalt |
 |---|---|
-| Übersicht | Gesamt-Dashboard: Ratings, Genauigkeit, größte Lecks, Aktivität |
-| Fehler-Training | Deine Fehler kommen wieder, nach dem Leitner-System mit drei Boxen |
-| 1 · Grundlagen | Ablauf einer Hand, Positionen, Rangfolge der Hände |
-| 2 · Wer gewinnt? | Showdown-Quiz |
-| 3 · Preflop | Raise oder Fold im 6-max, mit vereinfachten Open-Ranges |
-| 4 · Pot Odds | Call oder Fold mit Draws am Turn |
-| 5 · Arena | Heads-up-Push/Fold-Match gegen einen Nash-Bot oder einen Freizeitspieler-Bot |
-| 6 · Duell 100 BB | Preflop Heads-up mit 3-Bets und 4-Bets |
-| 7 · Flop | Flop-Entscheidungen in Single-Raised-Pots auf 12 Boards |
-| 8 · River | Exakt gelöste River-Spots, auch mit Overbets |
+| Start `/` | Empfehlung aus deinen Lecks, Ratings, Schnellstart |
+| Spielen `/spielen` | Push/Fold-Arena (Match gegen Freizeitspieler- oder Nash-Bot), Preflop-Duell mit 100 BB |
+| Training `/training` | Flop, River (exakt gelöst), Fehler-Training, Quiz: Wer gewinnt?, Raise oder Fold?, Pot Odds |
+| Lernen `/lernen` | Ablauf einer Hand, Rangfolge, Open-Raise-Ranges |
+| Statistik `/statistik` | Ratings, Genauigkeit, größte Lecks, Aktivität, Sichern/Laden, Zurücksetzen |
+| Rangliste `/rangliste` | Deine Einordnung gegenüber Referenzspielern |
 
-Nach jeder Entscheidung zeigt dir der Trainer den EV aller Optionen, deinen EV-Verlust, eine Einstufung von „Bester Zug“ bis „Patzer“ und den Strategie-Chart. Jeder Modus führt ein eigenes Elo-ähnliches Rating.
+Jede Analyse nennt den EV aller Optionen, deinen EV-Verlust, eine Einstufung von „Bester Zug“ bis „Patzer“, den Strategie-Chart und das zugrunde liegende Modell mit seinen Grenzen.
 
-Der Fortschritt wird nur im `localStorage` des Browsers gespeichert.
+## Entwicklung
+
+Voraussetzung: Node.js 20 oder neuer.
+
+```bash
+npm ci
+npm run dev       # Entwicklungsserver auf http://localhost:5173
+npm test          # Tests mit Abdeckungsprüfung (Kernlogik ≥ 80 %)
+npm run build     # Produktions-Build nach dist/
+npm run preview   # Build lokal ansehen
+```
+
+Der Evaluator-Test vergleicht 1 Mio. zufällige Hände mit einer unabhängigen Referenzbewertung und dauert etwa eine Minute. Die CI (`.github/workflows/ci.yml`) führt bei jedem Push Tests und Build aus.
+
+### Aufbau
+
+```
+index.html          Einstieg für Vite
+src/web/            React: Layout (Seitenleiste, mobile Tab-Leiste), Seiten, Designsystem (styles.css)
+src/modes/          Spielmodi und Fortschritt (imperativ, in Seiten eingehängt über ModeHost)
+src/core/           reine Logik ohne DOM, vollständig getestet
+  evaluator.js        die einzige Handbewertung für App und Solver
+  rating.js           Bewertung einer Entscheidung, Elo-Rating
+  storage.js          Speicherstand v2, Migration von v1, Export/Import
+  …                   Karten, Equity, Ranges, Pot Odds, Preflop, Push/Fold, Heads-up-Baum
+public/data/        Solver-Daten, werden erst geladen, wenn ein Modus sie braucht
+public/fonts/       JetBrains Mono (Zahlen) und ihre Lizenz; sonst Systemschrift
+solver/             Solver-Skripte
+test/               node:test-Suites
+```
+
+### Hosting
+
+Die Seite ist statisch und läuft auf Vercel (`vercel.json`) oder Netlify (`netlify.toml`); beide Dateien leiten alle Pfade auf `index.html` um, damit Unterseiten auch beim direkten Aufruf funktionieren. Repository einmal im Dashboard des Anbieters verbinden; danach baut jeder Push automatisch.
+
+### Speicherstand
+
+Der Fortschritt liegt im `localStorage` unter dem Schlüssel `pokerschule` (Schema-Version 2). Alte v1-Stände werden beim ersten Start übernommen. Künftige Schemaänderungen kommen als Funktion in `migrations` in `src/core/storage.js`.
 
 ## Solver
 
-Die Strategien sind vorab berechnet und in `index.html` eingebettet. Die Skripte in `solver/` erzeugen sie neu (Node.js 18 oder neuer).
+Die Skripte in `solver/` erzeugen die Daten in `public/data/` neu:
 
 | Skript | Ausgabe | Inhalt |
 |---|---|---|
 | `precompute.js [samples]` | `pf-data.json` | Preflop-Equity für alle 169×169 Starthände (Monte Carlo) und Push/Fold-Nash für 2–20 BB |
-| `cfr.js [iter]` | `hu-strat.json` | Heads-up-Preflop mit 100 BB per CFR+. Den Baum beschreibt `tree.json`. |
-| `flopsolve.js [iter]` | `flop-data.json` | Flop-CFR+ auf Kombo-Ebene für 12 Boards. Turn und River werden über Equity-Realisierung abgebildet. |
-| `riversolve.js [iter]` | `river-data.json` | 24 River-Spots, exakt gelöst. Die Ranges stammen aus dem Flop-Solver. |
-
-Reihenfolge und Abhängigkeiten:
+| `cfr.js [iter]` | `hu-strat.json` | Heads-up-Preflop mit 100 BB per CFR+. Den Baum beschreibt `data/hu-tree.json`. |
+| `flopsolve.js [iter]` | `flop-data.json` | Flop-CFR+ auf Kombo-Ebene für 12 Boards, mit Lösungsgüte je Board |
+| `riversolve.js [iter]` | `river-data.json` | 24 River-Spots, exakt gelöst, mit Lösungsgüte je Spot |
 
 ```bash
-cd solver
-node precompute.js 30000   # ~1 min
-node cfr.js 3000           # Sekunden, liest pf-data.json
-node flopsolve.js 1000     # ~2 min, liest pf-data.json + hu-strat.json
-node riversolve.js 1500    # ~1 min, liest flop-data.json
+npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schreibt nach public/data/
 ```
 
-Die erzeugten JSON-Dateien werden in `index.html` in die Tags `<script type="application/json">` mit den IDs `pf-data`, `hu-data`, `flop-data` und `river-data` eingefügt.
+**Lösungsgüte** heißt: So viel Prozent des Pots könnte ein perfekter Gegenspieler im Schnitt gegen die Strategie gewinnen. Aktuell liegen alle River-Spots bei höchstens 0,1 % und alle Flop-Boards unter 0,01 % des Pots (im Rahmen des jeweiligen Modells). Die Werte stehen in den Daten und in jeder Analyse.
 
 ## Grenzen der Modelle
 
-- **Preflop (100 BB):** Der Spielbaum ist vereinfacht. Es gibt keine Limps, und die Einsatzgrößen sind fest (2,5 / 10 / 22 / all-in). Nach dem Flop wird nicht weitergespielt, sondern über Equity-Realisierung bewertet.
+- **Preflop-Quiz (6-max):** Faustregel-Ranges, nicht vom Solver berechnet.
+- **Preflop (100 BB):** vereinfachter Spielbaum ohne Limps, feste Einsatzgrößen (2,5 / 10 / 22 / all-in). Nach dem Flop wird nicht weitergespielt, sondern über Equity-Realisierung bewertet.
 - **Flop:** Turn und River werden nicht ausgespielt. Das Modell bevorzugt deshalb große Bets und raist öfter als echte Solver.
 - **River:** Die Lösung ist exakt für diesen Baum, aber die Ranges stammen aus den vereinfachten früheren Stufen. Die Turn-Linie Check-Check ist fest vorgegeben.
+
+## Rechtliches
+
+Impressum, Datenschutzerklärung und Altershinweis sind in der App enthalten (Fußzeile). **Vor dem öffentlichen Betrieb müssen die gelb markierten Platzhalter in `src/web/pages/Legal.jsx` ausgefüllt werden.** Die Texte sind Vorlagen und keine Rechtsberatung.
+
+Lizenz: Alle Rechte vorbehalten, siehe [LICENSE](LICENSE). Die Schrift JetBrains Mono steht unter der SIL Open Font License 1.1 (`public/fonts/OFL-JetBrainsMono.txt`).

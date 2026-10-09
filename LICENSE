@@ -1,0 +1,11 @@
+Copyright (c) 2026 Daniel Daenecke. Alle Rechte vorbehalten.
+
+Der Quellcode, die Solver-Daten und alle Inhalte dieses Repositorys dürfen ohne
+vorherige schriftliche Zustimmung des Rechteinhabers weder vervielfältigt,
+verändert, verbreitet noch öffentlich zugänglich gemacht werden.
+
+Ausnahme: Schrift von Dritten
+-----------------------------
+Die Schriftdatei public/fonts/jetbrainsmono-500-latin.woff2 (JetBrains Mono)
+ist nicht Teil dieses Vorbehalts. Sie steht unter der SIL Open Font License,
+Version 1.1; der Lizenztext liegt in public/fonts/OFL-JetBrainsMono.txt.
