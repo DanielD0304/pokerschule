@@ -83,9 +83,9 @@ test('Altershinweis bleibt bestätigt; merge ist idempotent', () => {
 });
 
 test('öffentliche Kennzahlen: nur gespielte Modi, gewichtetes Gesamt-Rating', () => {
-  assert.deepEqual(publicStats(defaults()), { ratings: {}, overall: null, decisions: 0 });
+  assert.deepEqual(publicStats(defaults()), { ratings: {}, counts: {}, overall: null, decisions: 0 });
   const s = withMode(withMode(defaults(), 'flop', 30, 1200, 30), 'river', 10, 1000, 10);
-  assert.deepEqual(publicStats(s), { ratings: { flop: 1200, river: 1000 }, overall: 1150, decisions: 40 });
+  assert.deepEqual(publicStats(s), { ratings: { flop: 1200, river: 1000 }, counts: { flop: 30, river: 10 }, overall: 1150, decisions: 40 });
 });
 
 test('Anzeigenamen werden geprüft', () => {
