@@ -462,8 +462,10 @@ create table public.weekly_entries (
 );
 create index weekly_entries_rank on public.weekly_entries (week, loss, ms) where submitted_at is not null;
 
+-- Global zählt der Platz unter allen Teilnehmenden (wie für das Podest-Abzeichen); angezeigt werden davon nur
+-- öffentliche Profile und die eigene Zeile. Unter Freunden und in Gruppen zählt der Platz in diesem Kreis.
 create function public.weekly_board(p_week text, p_scope text default 'all', p_group uuid default null, p_limit integer default 100)
-returns table (pos bigint, name text, avatar text, loss real, ms integer, good integer, me boolean, is_public boolean)
+returns table (pos bigint, total bigint, name text, avatar text, loss real, ms integer, good integer, me boolean, is_public boolean)
 language plpgsql stable security definer set search_path = '' as $$
 #variable_conflict use_column
 declare uid uuid := auth.uid();
@@ -471,18 +473,21 @@ begin
   if p_scope not in ('all', 'friends', 'group') then raise exception 'Unbekannte Ansicht.'; end if;
   if p_scope = 'group' and (uid is null or not public.is_member(p_group, uid)) then raise exception 'Diese Gruppe gibt es nicht, oder du bist kein Mitglied.'; end if;
   return query
-  with r as (
-    select row_number() over (order by w.loss, w.ms, w.submitted_at) as rk, w.user_id, w.loss, w.ms, w.good, p.display_name, p.avatar, p.is_public
+  with c as (
+    select w.user_id, w.loss, w.ms, w.good, w.submitted_at, p.display_name, p.avatar, p.is_public,
+           case p_scope
+             when 'all' then (p.is_public and p.display_name is not null) or p.id = uid
+             when 'friends' then p.id = uid or public.are_friends(uid, p.id)
+             else public.is_member(p_group, p.id) end as visible
       from public.weekly_entries w join public.profiles p on p.id = w.user_id
      where w.week = p_week and w.submitted_at is not null
        and not exists (select 1 from public.fair_play f where f.user_id = p.id and f.banned)
-       and case p_scope
-             when 'all' then (p.is_public and p.display_name is not null) or p.id = uid
-             when 'friends' then p.id = uid or public.are_friends(uid, p.id)
-             else public.is_member(p_group, p.id) end
+  ), r as (
+    select row_number() over (order by c.loss, c.ms, c.submitted_at) as rk, count(*) over () as n, c.*
+      from c where p_scope = 'all' or c.visible
   )
-  select r.rk, coalesce(r.display_name, 'Du'), r.avatar, r.loss, r.ms, r.good, r.user_id = uid, r.is_public
-    from r where r.rk <= least(greatest(p_limit, 1), 200) or r.user_id = uid
+  select r.rk, r.n, coalesce(r.display_name, 'Du'), r.avatar, r.loss, r.ms, r.good, r.user_id = uid, r.is_public
+    from r where r.visible and (r.rk <= least(greatest(p_limit, 1), 200) or r.user_id = uid)
    order by r.rk;
 end $$;
 

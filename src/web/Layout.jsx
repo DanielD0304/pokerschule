@@ -15,7 +15,7 @@ const NAV = [
   { to: '/statistik', label: 'Statistik', icon: IconChart },
   { to: '/rangliste', label: 'Rangliste', icon: IconTrophy },
 ];
-const TABBAR = NAV.filter(n => n.to !== '/rangliste');
+const TABBAR = NAV;
 
 /** „Anmelden“ bzw. Anzeigename mit Sicherungsstatus; nur, wenn Konten eingerichtet sind. */
 function AccountLink({ compact }) {

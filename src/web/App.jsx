@@ -1,11 +1,18 @@
 import { Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import Layout from './Layout.jsx';
 import ModeHost from './ModeHost.jsx';
 import Home from './pages/Home.jsx';
 import { PlayHub, TrainHub, LearnHub, Basics } from './pages/Hubs.jsx';
 import Stats from './pages/Stats.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
+// Community-Seiten erst laden, wenn sie gebraucht werden (kleiner Startdownload)
+const Weekly = lazy(() => import('./pages/Weekly.jsx'));
+const Groups = lazy(() => import('./pages/Groups.jsx'));
+const GroupPage = lazy(() => import('./pages/Groups.jsx').then(m => ({ default: m.GroupPage })));
+const SetTrainer = lazy(() => import('./pages/Groups.jsx').then(m => ({ default: m.SetTrainer })));
+const Friends = lazy(() => import('./pages/Friends.jsx'));
+const Lazy = ({ children }) => <Suspense fallback={<div className="loading" role="status">Lade …</div>}>{children}</Suspense>;
 import { Impressum, Datenschutz, Lizenz, Regeln } from './pages/Legal.jsx';
 import Account, { PublicProfile } from './pages/Account.jsx';
 import Online, { MatchPage } from './pages/Online.jsx';
@@ -63,6 +70,11 @@ export default function App() {
         <Route path="lernen/ranges" element={<ModePage back={LERNEN} title="Open-Raise-Ranges" intro="Welche Hände du im 6-max von welcher Position eröffnest."><ModeHost html={M.RANGES} mount={mountRanges} /></ModePage>} />
         <Route path="statistik" element={<Stats />} />
         <Route path="rangliste" element={<Leaderboard />} />
+        <Route path="rangliste/woche" element={<Lazy><Weekly /></Lazy>} />
+        <Route path="rangliste/gruppen" element={<Lazy><Groups /></Lazy>} />
+        <Route path="rangliste/gruppen/:id" element={<Lazy><GroupPage /></Lazy>} />
+        <Route path="rangliste/gruppen/:id/set/:set" element={<Lazy><SetTrainer /></Lazy>} />
+        <Route path="rangliste/freunde" element={<Lazy><Friends /></Lazy>} />
         <Route path="konto" element={<Account />} />
         <Route path="spieler/:name" element={<PublicProfile />} />
         <Route path="impressum" element={<Impressum />} />

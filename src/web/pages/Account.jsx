@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import * as A from '../../modes/account.js';
 import { nameError } from '../../core/sync.js';
 import { MODES, levelOf } from '../../modes/insights.js';
+import { badgesOf } from '../../core/community.js';
+import { requestFriend } from '../../modes/community.js';
 
 export const useAccount = () => useSyncExternalStore(A.subscribe, A.getStatus);
 
@@ -222,6 +224,29 @@ export function PublicProfile() {
         ))}
       </div>
     </>)}
+    {badgesOf(p).some(b => b.earned) && (<>
+      <h2>Abzeichen</h2>
+      <ul className="badges">{badgesOf(p).filter(b => b.earned).map(b => <li key={b.id} className="earned" title={b.text}><b>{b.name}</b><span>{b.text}</span></li>)}</ul>
+    </>)}
     <p className="muted">{p.decisions} bewertete Entscheidungen. Ratings messen die Qualität der Entscheidungen gegen den Solver, nicht gewonnene Chips.</p>
+    <AddFriend name={p.display_name} />
   </>);
+}
+
+/** „Als Freund anfragen“ auf fremden öffentlichen Profilen. */
+function AddFriend({ name }) {
+  const s = useAccount();
+  const [state, setState] = useState(null);
+  if (!s.user || !s.profile?.display_name || s.profile.display_name.toLowerCase() === name.toLowerCase()) return null;
+  const send = async () => {
+    setState('busy');
+    try { await requestFriend(name); setState('sent'); } catch (e) { setState(errText(e)); }
+  };
+  return (
+    <div className="actions" style={{ justifyContent: 'flex-start', alignItems: 'center' }}>
+      <button className="btn" disabled={state === 'busy' || state === 'sent'} onClick={send}>{state === 'sent' ? 'Anfrage gesendet' : 'Als Freund anfragen'}</button>
+      {state && !['busy', 'sent'].includes(state) && <span className="form-msg bad" role="alert">{state}</span>}
+      <Link to="/rangliste/freunde" className="muted" style={{ fontSize: '.85rem' }}>Deine Freunde</Link>
+    </div>
+  );
 }
