@@ -81,8 +81,8 @@ code { font-family: var(--f-mono); font-size: .88em; }
   .main { margin-left: 0; padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)); }
   .topbar { display: flex; position: sticky; top: 0; z-index: 20; align-items: center; justify-content: space-between; padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px; background: var(--material); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border-bottom: 1px solid var(--line); }
   .topbar .brand { padding: 0; font-size: 1.05rem; }
-  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; inset: auto 0 0 0; z-index: 20; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--material); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border-top: 1px solid var(--line); }
-  .tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; font-size: .68rem; font-weight: 600; color: var(--muted); }
+  .tabbar { display: grid; grid-template-columns: repeat(6, 1fr); position: fixed; inset: auto 0 0 0; z-index: 20; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--material); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border-top: 1px solid var(--line); }
+  .tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; font-size: .64rem; min-width: 0; font-weight: 600; color: var(--muted); }
   .tabbar a svg { width: 24px; height: 24px; }
   .tabbar a.active { color: var(--accent); }
   .tabbar a:hover { text-decoration: none; }
@@ -301,3 +301,36 @@ mark.ph { background: color-mix(in srgb, var(--gold) 30%, transparent); color: v
 .clock.low .bar { background: var(--bad); }
 .clock .t { position: relative; font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { .clock .bar { transition: none; } }
+
+/* ---------- Community: Ranglisten, Wochen-Challenge, Gruppen, Freunde ---------- */
+.segmented { display: flex; gap: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 4px; border-radius: 12px; background: color-mix(in srgb, var(--fg) 5%, transparent); width: fit-content; max-width: 100%; margin-top: 6px; }
+.segmented::-webkit-scrollbar { display: none; }
+.segmented a, .segmented button { white-space: nowrap; flex: none; font: inherit; font-size: .9rem; font-weight: 600; padding: 7px 14px; min-height: 36px; border-radius: 9px; border: 0; background: none; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; }
+.segmented a:hover, .segmented button:hover { text-decoration: none; color: var(--fg); }
+.segmented .active { background: var(--surface); color: var(--fg); box-shadow: var(--shadow-1); }
+.who-cell { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.who-cell > :last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22ch; }
+.mini-avatar { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 14px; font-weight: 700; flex: none; }
+table.board tr.ref td { color: var(--muted); background: color-mix(in srgb, var(--fg) 2%, transparent); }
+@media (max-width: 560px) { table.board .hide-sm { display: none; } table.board td, table.board th { padding: 10px 6px; } .who-cell > :last-child { max-width: 11ch; } .who-cell .chip { display: none; } }
+.badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.badges li { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--line-strong); color: var(--faint); font-size: .82rem; }
+.badges li b { font-size: .92rem; }
+.badges li.earned { border-style: solid; border-color: color-mix(in srgb, var(--gold) 45%, transparent); background: color-mix(in srgb, var(--gold) 10%, var(--surface)); color: var(--fg); }
+.badges li.earned b::before { content: "★ "; color: var(--gold); }
+progress.progress { width: 100%; height: 6px; appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: var(--surface-2); }
+progress.progress::-webkit-progress-bar { background: var(--surface-2); }
+progress.progress::-webkit-progress-value { background: var(--accent); }
+progress.progress::-moz-progress-bar { background: var(--accent); }
+.spot-list { display: flex; flex-direction: column; }
+.spot-list details { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.spot-list details:last-child { border-bottom: 0; }
+.spot-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 14px; align-items: start; margin-top: 10px; }
+@media (max-width: 900px) { .spot-review { grid-template-columns: 1fr; } }
+.log .lr.member-row { grid-template-columns: minmax(0, 1.4fr) auto auto minmax(0, 1fr); }
+.log .lr.week-row { grid-template-columns: 4em 5em minmax(0, 1fr) auto; }
+@media (max-width: 560px) { .log .lr.member-row { grid-template-columns: minmax(0, 1fr) auto; } .log .lr.member-row > .row { grid-column: 1 / -1; justify-content: flex-start !important; } .log .lr.week-row { grid-template-columns: 4em minmax(0, 1fr) auto; } .log .lr.week-row > :nth-child(2) { display: none; } }
+.invite-box { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+fieldset.spot-pick { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px 12px; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px 16px; }
+fieldset.spot-pick legend { font-weight: 600; padding: 0 6px; }
+.field textarea { font: inherit; font-size: 1rem; }

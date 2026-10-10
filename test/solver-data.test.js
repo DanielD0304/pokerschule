@@ -6,10 +6,13 @@ import { makeTables, pctOf, base64ToBytes } from '../src/core/preflop.js';
 import { makeBots, evalSpot, lerp, REC_PUSH } from '../src/core/pushfold.js';
 import { makeHU, fR } from '../src/core/hutree.js';
 import { labelId, CMB } from '../src/core/cards.js';
+import { selectFlops } from '../src/core/flops.js';
+import { FIXED } from '../solver/paths.js';
 
 const read = f => JSON.parse(fs.readFileSync(new URL('../public/data/' + f, import.meta.url), 'utf8'));
 const pf = read('pf-data.json'), huStrat = read('hu-strat.json'), huTree = read('hu-tree.json');
-const flop = read('flop-data.json'), river = read('river-data.json');
+const flop = read('flop/index.json'), river = read('river-data.json');
+const flopBoards = flop.boards.map(b => read('flop/' + b.board + '.json'));
 const T = makeTables(pf);
 const near1 = (a, eps = .011) => Math.abs(a.reduce((x, y) => x + y, 0) - 1) <= eps;
 
@@ -72,11 +75,14 @@ test('Heads-up 100 BB: Strategien und Erwartungswerte', () => {
   assert.equal(HU.paySB({ t: 'fold', sb: 1 }, 0, 0), 1);
 });
 
-test('Flop-Daten: 12 Boards, Strategien, EV, Lösungsgüte', () => {
-  assert.ok(flop.boards.length >= 12);
-  for (const b of flop.boards) {
+test('Flop-Daten: 60 Boards nach Typ, Strategien, EV, Lösungsgüte', () => {
+  // Index und Auswahl im Code stimmen überein (sonst: npm run solve:flop)
+  const sel = selectFlops(60, FIXED);
+  assert.deepEqual(flop.boards.map(b => [b.board, b.w, b.tags]), sel.map(b => [b.board, +b.w.toFixed(6), b.tags]));
+  flop.boards.forEach((m, i) => { assert.equal(flopBoards[i].board, m.board); assert.equal(flopBoards[i].expl, m.expl); });
+  for (const b of flopBoards) {
     assert.equal(typeof b.expl, 'number', `${b.board} hat einen Wert für die Lösungsgüte`);
-    assert.ok(b.expl >= 0 && b.expl < 1, `${b.board}: ${b.expl} % Pot`);
+    assert.ok(b.expl >= 0 && b.expl < .05, `${b.board}: ${b.expl} % Pot`);
     for (const [id, n] of Object.entries(flop.tree)) if (!n.t) {
       const side = n.p === 'SB' ? b.sb : b.bb, A = n.a.length;
       assert.equal(b.n[id].s.length, side.c.length * A);
@@ -94,6 +100,7 @@ test('River-Daten: 24 Spots, höchstens 0,1 % des Pots ausnutzbar', () => {
   for (const sp of river.spots) {
     assert.ok(sp.expl <= .1, `${sp.board}: ${sp.expl} % Pot`);
     assert.ok(sp.P > 0 && sp.board.length === 10);
+    assert.ok(FIXED.includes(sp.board.slice(0, 6)), `${sp.board}: River-Spots stammen von den festen Flop-Boards`);
     for (const [id, n] of Object.entries(sp.tree)) if (!n.t) {
       const side = n.p === 'SB' ? sp.sb : sp.bb;
       assert.equal(sp.n[id].s.length, side.c.length * n.a.length);

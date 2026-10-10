@@ -1,11 +1,18 @@
 import { Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import Layout from './Layout.jsx';
 import ModeHost from './ModeHost.jsx';
 import Home from './pages/Home.jsx';
 import { PlayHub, TrainHub, LearnHub, Basics } from './pages/Hubs.jsx';
 import Stats from './pages/Stats.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
+// Community-Seiten erst laden, wenn sie gebraucht werden (kleiner Startdownload)
+const Weekly = lazy(() => import('./pages/Weekly.jsx'));
+const Groups = lazy(() => import('./pages/Groups.jsx'));
+const GroupPage = lazy(() => import('./pages/Groups.jsx').then(m => ({ default: m.GroupPage })));
+const SetTrainer = lazy(() => import('./pages/Groups.jsx').then(m => ({ default: m.SetTrainer })));
+const Friends = lazy(() => import('./pages/Friends.jsx'));
+const Lazy = ({ children }) => <Suspense fallback={<div className="loading" role="status">Lade …</div>}>{children}</Suspense>;
 import { Impressum, Datenschutz, Lizenz, Regeln } from './pages/Legal.jsx';
 import Account, { PublicProfile } from './pages/Account.jsx';
 import Online, { MatchPage } from './pages/Online.jsx';
@@ -51,7 +58,7 @@ export default function App() {
         <Route path="spielen/online" element={<Online />} />
         <Route path="spielen/online/match/:id" element={<MatchPage />} />
         <Route path="training" element={<TrainHub />} />
-        <Route path="training/flop" element={<ModePage back={TRAINING} title="Flop-Training" intro="Single-Raised-Pot, 100 BB: Der Small Blind hat erhöht, der Big Blind gecallt. Du spielst abwechselnd beide Seiten auf 12 typischen Flops."><ModeHost html={M.FLOP} mount={mountFlop} needs={NEEDS.flop} /></ModePage>} />
+        <Route path="training/flop" element={<ModePage back={TRAINING} title="Flop-Training" intro="Single-Raised-Pot, 100 BB: Der Small Blind hat erhöht, der Big Blind gecallt. Du spielst abwechselnd beide Seiten auf 60 Flops, die zusammen alle Board-Typen abdecken; mit dem Filter übst du gezielt einen Typ."><ModeHost html={M.FLOP} mount={mountFlop} needs={NEEDS.flop} /></ModePage>} />
         <Route path="training/river" element={<ModePage back={TRAINING} title="River-Training" intro="Die letzte Setzrunde, exakt gelöst: Value-Bets, Bluffs, Bluff-Catcher und Einsatzgrößen bis zum Overbet."><ModeHost html={M.RIVER} mount={mountRiver} needs={NEEDS.river} /></ModePage>} />
         <Route path="training/fehler" element={<ModePage back={TRAINING} title="Fehler-Training" intro="Situationen, in denen du daneben lagst, kommen wieder. Dreimal in Folge richtig, und sie ist gemeistert. Das Rating ändert sich hier nicht."><ModeHost html={M.REVIEW} mount={mountReview} /></ModePage>} />
         <Route path="training/showdown" element={<ModePage back={TRAINING} title="Wer gewinnt?" intro="Jeder nutzt die besten 5 von 7 Karten. Achte auf Kicker, Flush-Möglichkeiten und geteilte Pots."><ModeHost html={M.SHOW} mount={mountShow} /></ModePage>} />
@@ -63,6 +70,11 @@ export default function App() {
         <Route path="lernen/ranges" element={<ModePage back={LERNEN} title="Open-Raise-Ranges" intro="Welche Hände du im 6-max von welcher Position eröffnest."><ModeHost html={M.RANGES} mount={mountRanges} /></ModePage>} />
         <Route path="statistik" element={<Stats />} />
         <Route path="rangliste" element={<Leaderboard />} />
+        <Route path="rangliste/woche" element={<Lazy><Weekly /></Lazy>} />
+        <Route path="rangliste/gruppen" element={<Lazy><Groups /></Lazy>} />
+        <Route path="rangliste/gruppen/:id" element={<Lazy><GroupPage /></Lazy>} />
+        <Route path="rangliste/gruppen/:id/set/:set" element={<Lazy><SetTrainer /></Lazy>} />
+        <Route path="rangliste/freunde" element={<Lazy><Friends /></Lazy>} />
         <Route path="konto" element={<Account />} />
         <Route path="spieler/:name" element={<PublicProfile />} />
         <Route path="impressum" element={<Impressum />} />

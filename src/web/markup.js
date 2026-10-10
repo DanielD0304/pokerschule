@@ -49,6 +49,7 @@ export const DUEL = `
 export const FLOP = `
 <div class="game">
   <div class="game-main">
+    <div class="toolbar"><label>Boards <select id="fl-filter" aria-describedby="fl-boardinfo"></select></label><span class="muted" id="fl-boardinfo" style="font-size:.85rem"></span></div>
     <div class="table" id="fl-table"></div>
     <p class="prompt" id="fl-prompt"></p>
     <div class="actions" id="fl-actions"></div>
@@ -58,7 +59,8 @@ export const FLOP = `
     <div class="side-stats" id="fl-stats"></div>
     <section class="box"><h3>Letzte Hände</h3><div class="log" id="fl-log"></div></section>
     ${sideInfo('Wie funktioniert der Bot?', `
-      <p>Für jeden der 12 Flops wurde mit CFR+ ein Gleichgewicht auf Kombo-Ebene berechnet. Die Ranges stammen aus dem Preflop-Duell.</p>
+      <p>Für 60 Flops wurde mit CFR+ ein Gleichgewicht auf Kombo-Ebene berechnet. Die Ranges stammen aus dem Preflop-Duell.</p>
+      <p>Die 60 Boards sind so ausgewählt, dass sie zusammen alle 22 100 möglichen Flops vertreten: Jedes steht für eine Gruppe ähnlicher Flops (gleicher Typ, ähnliche Ränge) und kommt so oft dran, wie diese Gruppe in echten Händen vorkommt. Mit dem Filter übst du gezielt einen Board-Typ.</p>
       <p>Turn und River werden nicht gespielt, sondern über die exakte Equity und eine Realisierungsschätzung bewertet. Fold-, Call- und Value-Entscheidungen sind recht zuverlässig, Urteile über die Einsatzgröße weniger.</p>`)}
   </aside>
 </div>`;

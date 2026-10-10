@@ -36,6 +36,10 @@ export function Datenschutz() {
       <p>Wenn du online gegen andere spielst, verarbeiten wir zusätzlich: deine Aktionen und Bedenkzeiten in jedem Match, die ausgeteilten Karten, die Bewertung jeder Entscheidung, dein Online-Rating und Lebenszeichen deines Browsers während eines Matches (um Verbindungsabbrüche zu erkennen). Dein Gegner sieht deinen Anzeigenamen, dein Online-Rating und nach dem Match die Analyse aller Entscheidungen beider Spieler. Online-Rating und Bilanz stehen in deinem Profil und sind öffentlich, wenn dein Profil öffentlich ist.</p>
       <p>Um Hilfe durch Solver-Programme zu erkennen, werten wir Spielqualität und Gleichmäßigkeit der Bedenkzeiten deiner letzten Matches automatisch aus. Ein auffälliges Ergebnis führt nur zu einer Markierung, die der Betreiber prüft; gesperrt wird nur nach dieser Prüfung. Meldungen anderer Spieler über dich und deine Meldungen werden ebenfalls gespeichert. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Nutzungsvertrag, faire Wertung) und für die Fair-Play-Auswertung Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem fairen Rating).</p>
       <p>Wenn du dein Konto löschst, wird dein Name in den Matches deiner Gegner durch „Gelöschtes Konto“ ersetzt; deren Analyse bleibt für sie erhalten.</p>
+      <h2>Ranglisten, Freunde, Gruppen und Wochen-Challenge (freiwillig)</h2>
+      <p>Für die Ranglisten speichern wir in deinem Profil zusätzlich die Zahl deiner Entscheidungen je Modus, den Zeitpunkt deiner letzten Aktivität und je Tag den Stand deiner Ratings (für „diese Woche“ und „dieser Monat“). In der globalen Rangliste erscheinst du nur mit öffentlichem Profil, mit Anzeigename und Rating.</p>
+      <p>Wenn du eine Freundschaft annimmst oder einer Gruppe beitrittst, sehen deine Freunde bzw. die Mitglieder der Gruppe deinen Anzeigenamen, deine Ratings und deine Ergebnisse in der Wochen-Challenge, auch wenn dein Profil nicht öffentlich ist. Freunde sehen außerdem je Situation, wie viel EV du im Schnitt verlierst (berechnet aus deinen gespeicherten Entscheidungen). Die Gruppenleitung sieht, wie viel du in ihren Spot-Sets geübt hast.</p>
+      <p>In der Wochen-Challenge speichern wir deine Antworten und Bedenkzeiten. Dein Ergebnis erscheint in der Wertung der Woche (global nur mit öffentlichem Profil); nach dem Ende der Woche fließen deine Antworten anonym in die Verteilung „wie alle entschieden haben“ ein. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Nutzungsvertrag). Freundschaften, Gruppen und Einträge löschst du, indem du sie beendest, die Gruppe verlässt oder dein Konto löschst.</p>
       <p><b>Speicherdauer und Löschung:</b> Die Daten bleiben gespeichert, bis du dein Konto löschst. Unter „Konto“ kannst du jederzeit alle Kontodaten als Datei herunterladen und das Konto selbst löschen. Dabei werden alle Daten sofort entfernt; Sicherungskopien des Anbieters laufen nach spätestens 30 Tagen aus.</p>
       <h2>Hosting</h2>
       <p>Die Website wird über <Ph>[Hosting-Anbieter, z. B. Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA, oder Netlify, Inc.]</Ph> ausgeliefert. Beim Abruf verarbeitet der Anbieter technisch notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit und die abgerufene Datei in Server-Logs. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt in der sicheren und stabilen Auslieferung der Website. Mit dem Anbieter besteht <Ph>[ein Auftragsverarbeitungsvertrag / Angaben zur Übermittlung in Drittländer]</Ph>. Einzelheiten stehen in der Datenschutzerklärung des Anbieters.</p>
@@ -59,8 +63,14 @@ export function Regeln() {
         <li>Anzeigenamen dürfen niemanden beleidigen, keine Marken von Pokeranbietern enthalten und sich nicht als andere Person ausgeben.</li>
         <li>Wer aufgibt oder länger als 60 Sekunden nicht verbunden ist, verliert das Match. Läuft die Bedenkzeit ab, zählt die Hand als Fold.</li>
       </ul>
+      <h2>Ranglisten, Gruppen und Wochen-Challenge</h2>
+      <ul>
+        <li>Die Regeln des Online-Spiels gelten auch hier: Löse Trainings-Spots und die Wochen-Challenge selbst, ohne Solver oder andere Hilfen.</li>
+        <li>Gruppennamen und Spot-Sets dürfen niemanden beleidigen und nicht für Pokeranbieter werben.</li>
+        <li>Teile Einladungslinks nur mit Leuten, die du kennst.</li>
+      </ul>
       <h2>Prüfung und Sperren</h2>
-      <p>Auffällige Spielmuster werden automatisch markiert und vom Betreiber geprüft, ebenso Meldungen anderer Spieler. Bei Verstößen kann der Betreiber ein Konto vom Online-Spiel ausschließen. Wenn du eine Sperre für einen Fehler hältst, schreib an die Adresse im <a href="/impressum">Impressum</a>.</p>
+      <p>Auffällige Spielmuster werden automatisch markiert und vom Betreiber geprüft, ebenso Meldungen anderer Spieler. Bei Verstößen kann der Betreiber ein Konto vom Online-Spiel und aus den Ranglisten ausschließen. Wenn du eine Sperre für einen Fehler hältst, schreib an die Adresse im <a href="/impressum">Impressum</a>.</p>
       <p className="muted">Stand: <Ph>[Datum]</Ph>. Vorlage, keine Rechtsberatung; vor dem Start rechtlich prüfen lassen.</p>
     </div>
   );

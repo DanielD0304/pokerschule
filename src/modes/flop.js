@@ -1,4 +1,4 @@
-// Flop-Training im Single-Raised-Pot auf Kombo-Ebene.
+// Flop-Training im Single-Raised-Pot auf Kombo-Ebene: 60 Boards nach Typ, gezogen nach Häufigkeit, je Board erst bei Bedarf geladen.
 import { RANKS, SUITS, RNAME, RONE, icard, cint, cid, classOfInts } from '../core/cards.js';
 import { evalCards, toArray, handName } from '../core/evaluator.js';
 import { exactEq } from '../core/equity.js';
@@ -6,7 +6,8 @@ import { applyDecision, K_DIFF } from '../core/rating.js';
 import { fR } from '../core/hutree.js';
 import { state, persist, renderHeader } from './store.js';
 import { track, saveMistake } from './progress.js';
-import { flopData } from './data.js';
+import { flopIndex, flopBoard, loadFlopBoard } from './data.js';
+import { TAGS, pickBoard } from '../core/flops.js';
 import { $, cardsHTML, BACKS, SLOT, nf, sg, pc1, strCards, ratingCard, evCards, logHTML, pushLog, worstOf, decisionBlock, mixText, mixMatrix, modelNote, analysis, pickW, sampleIndex } from './dom.js';
 
 export const FNODE = {
@@ -63,7 +64,7 @@ function render() {
 }
 const seqText = () => H.hist.map(x => `${x.who === 'me' ? 'Du' : 'Bot'} ${NAME[x.a]}`).join(' · ');
 function renderTable(reveal) {
-  const FT = flopData().tree, pot = FT[H.node].t ? H.finalPot : FNODE[H.node].pot, botPos = H.pos === 'SB' ? 'BB' : 'SB';
+  const FT = flopIndex().tree, pot = FT[H.node].t ? H.finalPot : FNODE[H.node].pot, botPos = H.pos === 'SB' ? 'BB' : 'SB';
   $('fl-table').innerHTML = `<div class="seat"><span class="label">Bot · ${botPos} · ${botPos === 'SB' ? 'in Position' : 'out of position'}</span><div class="row">${reveal ? cardsHTML(H.bot) : BACKS}</div></div>
     <span class="label">Flop · Preflop: SB erhöht auf 2,5, BB callt</span>
     <div class="row">${cardsHTML(H.board)}${SLOT}${SLOT}</div>
@@ -72,17 +73,46 @@ function renderTable(reveal) {
     <div class="seat"><div class="row">${cardsHTML(H.me)}</div><span class="label">Du · ${H.pos} · ${H.pos === 'SB' ? 'in Position' : 'out of position'}</span><span style="font-size:.9rem">${describe(H.me, H.board)}</span></div>`;
 }
 
-function newHand() {
-  const FD = flopData(), B = FD.boards[(Math.random() * FD.boards.length) | 0];
+// gewählter Board-Typ (null: alle); das nächste Board wird schon während der Hand geladen
+const tag = () => (state.ui.flopTag && TAGS[state.ui.flopTag] ? state.ui.flopTag : null);
+let seq = 0, upcoming = null;
+const choose = () => pickBoard(flopIndex().boards, Math.random, tag());
+function prefetch() {
+  upcoming = choose();
+  loadFlopBoard(upcoming.board).catch(() => { upcoming = null; });
+}
+function boardInfo(meta) {
+  const idx = flopIndex().boards, nr = idx.findIndex(b => b.board === meta.board) + 1;
+  const types = meta.tags.map(t => TAGS[t].name).join(' · ');
+  $('fl-boardinfo').textContent = `Board ${nr} von ${idx.length}${types ? ' · ' + types : ''} · steht für ${nf(meta.w * 100, 1)} % aller Flops`;
+}
+async function newHand() {
+  const my = ++seq, meta = upcoming || choose();
+  upcoming = null;
+  $('fl-fb').innerHTML = ''; $('fl-actions').innerHTML = ''; $('fl-prompt').innerHTML = '';
+  let B = flopBoard(meta.board);
+  if (!B) {
+    $('fl-table').innerHTML = '<p role="status">Lade Board …</p>';
+    try { B = await loadFlopBoard(meta.board); } catch (e) {
+      if (my !== seq || !$('fl-table')) return;
+      $('fl-table').innerHTML = `<p role="alert">${e.message}</p>`;
+      $('fl-actions').innerHTML = '<button class="btn primary" id="fl-retry">Erneut versuchen</button>';
+      $('fl-retry').onclick = () => { upcoming = meta; newHand(); };
+      return;
+    }
+    if (my !== seq || !$('fl-table')) return; // inzwischen anderer Filter gewählt oder Seite verlassen
+  }
+  boardInfo(meta);
+  prefetch();
   const board = [0, 2, 4].map(k => ({ r: RANKS.indexOf(B.board[k]) + 2, s: SUITS.indexOf(B.board[k + 1]) }));
   const pos = F().hands % 2 === 0 ? 'BB' : 'SB', mine = pos === 'SB' ? B.sb : B.bb, his = pos === 'SB' ? B.bb : B.sb;
   const mi = pickW(mine.c, mine.w, () => true), mc = mine.c[mi], ma = Math.floor(mc / 52), mb = mc % 52;
   const bi = pickW(his.c, his.w, c => { const a = Math.floor(c / 52), b = c % 52; return a !== ma && a !== mb && b !== ma && b !== mb; }), bc = his.c[bi];
   H = { B, board, pos, mi, bi, me: [icard(ma), icard(mb)], meI: [ma, mb], bot: [icard(Math.floor(bc / 52)), icard(bc % 52)], botI: [Math.floor(bc / 52), bc % 52], node: 'f_root', hist: [], dec: [], path: [] };
-  $('fl-fb').innerHTML = ''; advance();
+  advance();
 }
 function advance() {
-  const FT = flopData().tree, id = H.node, n = FT[id];
+  const FT = flopIndex().tree, id = H.node, n = FT[id];
   if (n.t) return finish();
   const A = n.a.length;
   if (n.p !== H.pos) {
@@ -95,7 +125,7 @@ function advance() {
   document.querySelectorAll('#fl-actions button').forEach(b => { b.onclick = () => act(+b.dataset.k); });
 }
 function act(k) {
-  const FT = flopData().tree, id = H.node, n = FT[id], A = n.a.length;
+  const FT = flopIndex().tree, id = H.node, n = FT[id], A = n.a.length;
   $('fl-actions').innerHTML = ''; $('fl-prompt').innerHTML = '';
   const ev = H.B.n[id].e.slice(H.mi * A, H.mi * A + A).map(x => x / 100), st = H.B.n[id].s.slice(H.mi * A, H.mi * A + A);
   const r = applyDecision(F(), ev, k, K_DIFF.flop);
@@ -106,7 +136,7 @@ function act(k) {
   H.hist.push({ who: 'me', a: n.a[k] }); H.node = n.c[k]; advance();
 }
 function chart(id, path) {
-  const FT = flopData().tree, side = H.pos === 'SB' ? H.B.sb : H.B.bb, n = FT[id], A = n.a.length;
+  const FT = flopIndex().tree, side = H.pos === 'SB' ? H.B.sb : H.B.bb, n = FT[id], A = n.a.length;
   const agg = Array.from({ length: 169 }, () => ({ w: 0, a: new Float64Array(A) }));
   side.c.forEach((c, i) => {
     let w = side.w[i];
@@ -118,7 +148,7 @@ function chart(id, path) {
   return mixMatrix(cl => agg[cl].w > 0 ? Array.from(agg[cl].a, x => x / agg[cl].w) : null, n.a, NAME, COL, cid(H.me));
 }
 function finish() {
-  const FT = flopData().tree, t = FT[H.node], sign = H.pos === 'SB' ? 1 : -1, fs = F();
+  const FT = flopIndex().tree, t = FT[H.node], sign = H.pos === 'SB' ? 1 : -1, fs = F();
   let ev, out;
   if (t.t === 'fold') {
     ev = sign * t.sb; H.finalPot = 0;
@@ -139,6 +169,17 @@ function finish() {
   analysis('fl-fb', `<p>Auf dem Flop hattest du <b>${pc1(eqR)}</b> Equity gegen die gesamte Range des Bots. EV-Werte gelten für die ganze Hand, inklusive der 2,5 BB, die du preflop investiert hast.</p>${blocks || '<p>In dieser Hand musstest du nichts entscheiden.</p>'}<p style="border-top:1px solid var(--line);padding-top:12px">${out}</p>${modelNote(model(H.B.expl))}`, 'Nächste Hand', newHand);
 }
 
+function filterUI() {
+  const idx = flopIndex().boards, sel = $('fl-filter');
+  sel.innerHTML = `<option value="">Alle Boards (${idx.length})</option>` + Object.entries(TAGS).map(([k, t]) => {
+    const n = idx.filter(b => b.tags.includes(k)).length;
+    return n ? `<option value="${k}" title="${t.text}">${t.name} (${n})</option>` : '';
+  }).join('');
+  sel.value = tag() || '';
+  sel.onchange = () => { state.ui.flopTag = sel.value || null; persist(); upcoming = null; newHand(); };
+}
+
 export function mountFlop() {
-  render(); newHand();
+  seq++; upcoming = null; // beim erneuten Öffnen der Seite keine alte Hand fortsetzen
+  filterUI(); render(); newHand();
 }

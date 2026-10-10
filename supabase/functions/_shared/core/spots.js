@@ -87,7 +87,8 @@ function reachWeights(side, nodes, tree, path, pos) {
 
 function postflopSpot(kind, set, node, rand, describe) {
   for (let tries = 0; tries < 40; tries++) {
-    const bi = Math.floor(rand() * set.length), B = set[bi], tree = describe.tree(B);
+    // Flop-Boards tragen ein Gewicht (Anteil aller Flops); ohne Gewicht gleich oft
+    const bi = pickWeighted(set.map(b => b.w ?? 1), rand), B = set[bi], tree = describe.tree(B);
     const path = pathTo(tree, describe.root, node), n = tree[node];
     if (!path || !n || n.t) throw new Error('Unbekannte Situation ' + node);
     const pos = n.p, side = pos === 'SB' ? B.sb : B.bb;
@@ -97,7 +98,7 @@ function postflopSpot(kind, set, node, rand, describe) {
     const ev = Array.from(B.n[node].e.slice(mi * A, mi * A + A), x => r4(x / 100));
     const st = Array.from(B.n[node].s.slice(mi * A, mi * A + A)), tot = st.reduce((a, b) => a + b, 0) || 1;
     return {
-      key: kind + ':' + node, kind, node, pos, ref: [bi, mi],
+      key: kind + ':' + node, kind, node, pos, ref: [B.board, mi],
       hero: [Math.floor(c / 52), c % 52], board: boardInts(B.board),
       ...describe.text(B, tree, path, node),
       acts: n.a.slice(), ev, mix: st.map(x => r4(x / tot)), model: MODEL[kind](B.expl),
@@ -165,7 +166,8 @@ function duelSpot(HU, node, rand) {
 }
 
 /**
- * Erzeugt einen Spot. ctx: { flop: flop-data.json, river: river-data.json, HU: makeHU(...) } (nur, was gebraucht wird).
+ * Erzeugt einen Spot. ctx: { flop: { tree, boards } (Flop-Index und geladene Boards mit Gewicht w), river: river-data.json,
+ * HU: makeHU(...) } (nur, was gebraucht wird).
  * key: z. B. 'river:r_vs75'. rand: gleichverteilt [0, 1). Ergebnis null, wenn die Situation nicht erreichbar ist.
  */
 export function makeSpot(ctx, key, rand = Math.random) {

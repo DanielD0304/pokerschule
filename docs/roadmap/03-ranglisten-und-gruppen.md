@@ -60,3 +60,22 @@ flowchart TB
 - Aufwand: 3–4 Wochen.
 - Risiko Manipulation: Ranglisten belohnen Solver-Hilfe → Fair-Play-Maßnahmen aus 02 gelten auch hier.
 - Risiko Leere: Am Anfang wenige Einträge → Referenzspieler (heutige Rangliste) bleiben sichtbar.
+
+## Stand der Umsetzung
+
+Umgesetzt am 10. Oktober 2026, Einrichtung: [../community-einrichten.md](../community-einrichten.md).
+
+| Punkt | Stand |
+|---|---|
+| Globale Rangliste je Modus (Arena, Duell, Flop, River, Online Push/Fold, Online Duell) und gesamt | umgesetzt, Seite `/rangliste` |
+| Mindestzahl 200 Entscheidungen bzw. 10 Matches, ausgeblendet nach 30 Tagen, nur öffentliche Profile, gesperrte Konten nie | umgesetzt |
+| Ansichten Gesamt, diese Woche, dieser Monat (Saison), Freunde, Gruppe; Referenzspieler bleiben sichtbar | umgesetzt |
+| Gruppen: anlegen, Einladung per Link mit Ablauf, neu erzeugen, entfernen, Leitung übergeben, bis 50 Mitglieder, Gruppenrangliste | umgesetzt, `/rangliste/gruppen` |
+| Wochen-Challenge: 20 gleiche Spots, einmal spielen, Ergebnis nach Abgabe, Verteilung nach Sonntag, Wertung nach EV-Verlust und Zeit | umgesetzt, `/rangliste/woche`, Edge Function `challenge` |
+| Spot-Sets der Gruppenleitung mit Übungsstand der Mitglieder | umgesetzt |
+| Freundesliste (Link oder Anfrage), „du gegen Freund“ je Situation | umgesetzt, `/rangliste/freunde` |
+| Abzeichen für Meilensteine | umgesetzt (Rangliste und öffentliches Profil) |
+| Datenbank-Tests | in PGlite (`test/database.test.js`), noch nicht gegen ein echtes Supabase-Projekt |
+| Eine Gruppe im Echtbetrieb (Abnahme Phase 3) | offen, braucht das Supabase-Projekt |
+
+Grenze: Die Trainings-Ratings berechnet der Browser; die Ranglisten dafür lassen sich mit Aufwand fälschen. Online-Rating und Wochen-Challenge bewertet der Server.
