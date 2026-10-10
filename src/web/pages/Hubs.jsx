@@ -35,7 +35,7 @@ export function TrainHub() {
     <Head title="Training" text="Einzelne Situationen gezielt üben, vom Grundlagen-Quiz bis zum exakt gelösten River." />
     <h2>Solver-Training</h2>
     <div className="grid3">
-      <Tile to="/training/flop" icon={IconTarget} title="Flop" text="C-Bet, Check-Raise, Verteidigen: 12 Boards, gelöst auf Kombo-Ebene." meta={chip(`Rating ${Math.round(s.flop.rating)}`)} />
+      <Tile to="/training/flop" icon={IconTarget} title="Flop" text="C-Bet, Check-Raise, Verteidigen: 60 Boards nach Typ, gelöst auf Kombo-Ebene." meta={chip(`Rating ${Math.round(s.flop.rating)}`)} />
       <Tile to="/training/river" icon={IconTarget} title="River" text="Value-Bet, Bluff, Bluff-Catcher, Overbets. Exakt gelöst." meta={chip(`Rating ${Math.round(s.river.rating)}`)} />
       <Tile to="/training/fehler" icon={IconRepeat} title="Fehler-Training" text="Deine eigenen Fehler, bis du sie dreimal in Folge richtig löst." meta={chip(`${s.review.items.length} offen`)} />
     </div>

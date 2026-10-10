@@ -88,8 +88,8 @@ Die Skripte in `solver/` erzeugen die Daten in `public/data/` neu:
 |---|---|---|
 | `precompute.js [samples]` | `pf-data.json` | Preflop-Equity für alle 169×169 Starthände (Monte Carlo) und Push/Fold-Nash für 2–20 BB |
 | `cfr.js [iter]` | `hu-strat.json` | Heads-up-Preflop mit 100 BB per CFR+. Den Baum beschreibt `data/hu-tree.json`. |
-| `flopsolve.js [iter]` | `flop-data.json` | Flop-CFR+ auf Kombo-Ebene für 12 Boards, mit Lösungsgüte je Board |
-| `riversolve.js [iter]` | `river-data.json` | 24 River-Spots, exakt gelöst, mit Lösungsgüte je Spot |
+| `flopsolve.js [iter] [--fehlende]` | `flop/index.json`, `flop/<board>.json` | Flop-CFR+ auf Kombo-Ebene für 60 Boards nach Typ (Auswahl und Gewichte: `src/core/flops.js`), eine Datei je Board, mit Lösungsgüte; `--fehlende` setzt einen abgebrochenen Lauf fort |
+| `riversolve.js [iter]` | `river-data.json` | 24 River-Spots auf den 12 festen Flop-Boards, exakt gelöst, mit Lösungsgüte je Spot |
 
 ```bash
 npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schreibt nach public/data/
@@ -101,7 +101,7 @@ npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schre
 
 - **Preflop-Quiz (6-max):** Faustregel-Ranges, nicht vom Solver berechnet.
 - **Preflop (100 BB):** vereinfachter Spielbaum ohne Limps, feste Einsatzgrößen (2,5 / 10 / 22 / all-in). Nach dem Flop wird nicht weitergespielt, sondern über Equity-Realisierung bewertet.
-- **Flop:** Turn und River werden nicht ausgespielt. Das Modell bevorzugt deshalb große Bets und raist öfter als echte Solver.
+- **Flop:** 60 Boards vertreten alle 22 100 Flops; jedes steht für eine Gruppe ähnlicher Flops und wird so oft gezogen, wie diese vorkommt. Innerhalb einer Gruppe kann die richtige Strategie abweichen. Turn und River werden nicht ausgespielt. Das Modell bevorzugt deshalb große Bets und raist öfter als echte Solver.
 - **River:** Die Lösung ist exakt für diesen Baum, aber die Ranges stammen aus den vereinfachten früheren Stufen. Die Turn-Linie Check-Check ist fest vorgegeben.
 
 ## Rechtliches

@@ -66,3 +66,21 @@ Mehr und realistischere Situationen: vom einzelnen Flop-Spot zur ganzen Hand, vo
 - Aufwand: B-01 1 Woche, B-03 2 Wochen, B-04 2 Wochen, B-05 1 Woche, B-06 3 Wochen, B-07 1 Woche.
 - Risiko Rechenzeit: Turn und 6-max sind deutlich teurer → Solver parallelisieren, nur lösen, was im Training vorkommt.
 - Risiko Modellgrenzen: Die Flop-Lösung nutzt weiter Equity-Realisierung → mit dem Turn-Solver lässt sich prüfen, wie groß der Fehler ist, und die Hinweise in der App entsprechend anpassen.
+
+## Stand der Umsetzung
+
+| ID | Stand |
+|---|---|
+| B-01 · 60 Flops nach Board-Typ | umgesetzt am 10. Oktober 2026 (Details unten) |
+| B-03 bis B-07 | offen |
+
+### B-01 im Einzelnen
+
+- **Auswahl** (`src/core/flops.js`): Die 22 100 möglichen Flops ergeben nach Farbvertauschung 1 755 strategisch verschiedene. Daraus wählt `selectFlops` 60 Boards: Plätze je Typ (ungepaart mit drei, zwei oder einer Farbe, gepaart, Drilling) nach Häufigkeit mit Mindestzahlen, die großen Typen zusätzlich nach der höchsten Karte geteilt, darin gewichtete k-Medoids über Ränge, Straßenmöglichkeit und Flush-Struktur. Die bisherigen 12 Boards sind fest dabei, weil die River-Spots auf ihnen beruhen; ihre Lösungen sind bit-genau gleich geblieben.
+- **Gewichtung**: Jedes Board steht für die Flops, die ihm am nächsten sind (Anteil steht in den Daten und im Training, z. B. „steht für 2,1 % aller Flops“). Gezogen wird nach diesem Anteil, damit das Training der Verteilung echter Hände folgt.
+- **Filter** im Flop-Training: Trocken, Nass, Gepaart, Monoton, Broadway, Niedrig, Ass-hoch (jeweils mindestens 4 Boards); die Wahl bleibt gespeichert.
+- **Daten**: `public/data/flop/index.json` (5 KB) und je Board eine Datei (zusammen 8,1 MB, je etwa 135 KB). Geladen werden der Index und das ausgeteilte Board; das nächste lädt während der laufenden Hand. Vorher lud das Flop-Training 1,6 MB auf einmal.
+- **Lösungsgüte**: alle 60 Boards höchstens 0,007 % des Pots ausnutzbar (1 000 Iterationen CFR+, 9 Minuten auf 16 Threads), sichtbar in jeder Analyse.
+- Wochen-Challenge und Spot-Sets der Gruppen ziehen Flop-Spots ebenfalls aus allen 60 Boards, gewichtet nach Häufigkeit.
+
+Grenze: Innerhalb einer Gruppe ähnlicher Flops kann die beste Strategie abweichen; das Board vertritt sie nur. Turn und River werden weiter über Equity-Realisierung geschätzt.

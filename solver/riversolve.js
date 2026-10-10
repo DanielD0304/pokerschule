@@ -1,10 +1,10 @@
 // River-Solver (CFR+), exakt: Ranges aus dem Flop-Solver (SB C-Bet, BB Call, Turn Check-Check).
-// Aufruf: node solver/riversolve.js [iter]   liest data/flop-data.json → data/river-data.json
+// Aufruf: node solver/riversolve.js [iter]   liest die 12 festen Boards aus data/flop/ → data/river-data.json
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import fs from 'node:fs';
 import { cardFromStr as card, cardStr as cstr } from '../src/core/cards.js';
 import { eval7 } from '../src/core/evaluator.js';
-import { DATA_DIR } from './paths.js';
+import { DATA_DIR, FLOP_DIR, FIXED } from './paths.js';
 
 // Baum relativ zum Pot P, Einsatz pro Spieler vor dem River I0 = P/2
 function buildTree(P) {
@@ -106,7 +106,8 @@ function solve({ spot, N }) {
 if (!isMainThread) parentPort.postMessage(solve(workerData));
 else {
   const N = +process.argv[2] || 1500, t0 = Date.now();
-  const FD = JSON.parse(fs.readFileSync(DATA_DIR + '/flop-data.json', 'utf8'));
+  // nur die 12 festen Boards (FIXED in flopsolve.js); die übrigen 48 Flop-Boards haben keine River-Spots
+  const FD = { boards: FIXED.map(b => JSON.parse(fs.readFileSync(FLOP_DIR + '/' + b + '.json', 'utf8'))) };
   let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
   const spots = [];
   for (const B of FD.boards) {

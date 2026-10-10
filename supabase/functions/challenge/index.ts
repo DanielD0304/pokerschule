@@ -11,7 +11,7 @@ import { makeHU } from '../_shared/core/hutree.js';
 import pf from '../_shared/data/pf-data.json' with { type: 'json' };
 import huTree from '../_shared/data/hu-tree.json' with { type: 'json' };
 import huStrat from '../_shared/data/hu-strat.json' with { type: 'json' };
-import flop from '../_shared/data/flop-data.json' with { type: 'json' };
+import flop from '../_shared/data/flop/all.js'; // alle 60 Boards mit Gewicht (erzeugt von functions:sync)
 import river from '../_shared/data/river-data.json' with { type: 'json' };
 
 const ctx = { HU: makeHU(makeTables(pf), { tree: huTree, strat: huStrat }), flop, river };

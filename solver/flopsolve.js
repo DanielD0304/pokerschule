@@ -1,11 +1,15 @@
 // Flop-Solver (CFR+) für Single-Raised-Pots heads-up, 100 BB, auf Kombo-Ebene.
 // Turn und River werden über Equity-Realisierung abgebildet (exakte Flop-Equity Kombo gegen Kombo).
-// Aufruf: node solver/flopsolve.js [iter] [board]   liest data/hu-strat.json → data/flop-data.json
+// Aufruf: node solver/flopsolve.js [iter] [board | --fehlende]   liest data/hu-strat.json → data/flop/
+//   ohne Board: alle 60 Boards aus src/core/flops.js, je Board eine Datei data/flop/<board>.json plus data/flop/index.json
+//   --fehlende: nur Boards ohne Datei lösen (Fortsetzen nach Abbruch); ein Board: nur dieses lösen und ausgeben
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import fs from 'node:fs';
+import os from 'node:os';
+import { selectFlops } from '../src/core/flops.js';
 import { cardFromStr, classOfInts } from '../src/core/cards.js';
 import { eval7 } from '../src/core/evaluator.js';
-import { DATA_DIR } from './paths.js';
+import { DATA_DIR, FLOP_DIR, FIXED } from './paths.js';
 
 export const TREE = {
   f_root:   { p: 'BB', a: ['check', 'donk'], c: ['f_ip', 'f_vsDonk'] },
@@ -24,7 +28,7 @@ export const TREE = {
   t_fd: { t: 'fold', sb: -2.5 }, t_cd: { t: 'sd', pot: 8.3, inv: 4.15, d: .06 },
   t_fdr: { t: 'fold', sb: 4.15 }, t_cdr: { t: 'sd', pot: 15, inv: 7.5, d: .03 },
 };
-const BOARDS = ['As7d2c', 'Kc8h3s', 'Qh9h4c', 'Jd9c8d', '7h6h5c', 'Tc5c2c', '8d8s3c', 'AhKdQs', '9s4d2h', 'KhKs5d', 'Ad5s4h', 'Js7s3d'];
+// Die ersten 12 Boards sind fest (FIXED, aus ihnen leitet solver/riversolve.js die River-Spots ab), die übrigen wählt selectFlops.
 const POT = 5;
 
 function solve(boardStr, N) {
@@ -123,15 +127,35 @@ function solve(boardStr, N) {
 }
 
 if (!isMainThread) parentPort.postMessage(solve(workerData.board, workerData.N));
-else {
-  const N = +process.argv[2] || 1000, t0 = Date.now(), only = process.argv[3];
-  const list = only ? [only] : BOARDS;
-  const res = await Promise.all(list.map(board => new Promise((ok, no) => {
+else if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(new URL(import.meta.url))) {
+  const N = +process.argv[2] || 1000, t0 = Date.now(), arg = process.argv[3];
+  const selection = selectFlops(60, FIXED);
+  const run = board => new Promise((ok, no) => {
     const w = new Worker(new URL(import.meta.url), { workerData: { board, N } }); w.on('message', ok); w.on('error', no);
-  })));
-  for (const r of res) console.log(r.out.board, 'nS', r.nS, 'nB', r.nB, 'Ausnutzbarkeit', r.out.expl + '% Pot');
-  if (!only) {
-    fs.writeFileSync(DATA_DIR + '/flop-data.json', JSON.stringify({ tree: TREE, boards: res.map(r => r.out) }));
-    console.log('fertig', (Date.now() - t0) / 1000, 's', fs.statSync(DATA_DIR + '/flop-data.json').size, 'bytes');
+  });
+  if (arg && arg !== '--fehlende') {
+    const r = await run(arg);
+    console.log(r.out.board, 'nS', r.nS, 'nB', r.nB, 'Ausnutzbarkeit', r.out.expl + '% Pot');
+  } else {
+    fs.mkdirSync(FLOP_DIR, { recursive: true });
+    const file = b => `${FLOP_DIR}/${b}.json`;
+    const todo = selection.map(b => b.board).filter(b => arg !== '--fehlende' || !fs.existsSync(file(b)));
+    // höchstens so viele Worker wie Kerne (ein Board braucht etwa 50 s und einige hundert MB)
+    const pool = Math.max(1, Math.min(todo.length, os.availableParallelism() - 1));
+    let next = 0, done = 0;
+    await Promise.all(Array.from({ length: pool }, async () => {
+      while (next < todo.length) {
+        const r = await run(todo[next++]);
+        fs.writeFileSync(file(r.out.board), JSON.stringify(r.out));
+        console.log(`${++done}/${todo.length}`, r.out.board, 'nS', r.nS, 'nB', r.nB, 'Ausnutzbarkeit', r.out.expl + '% Pot', Math.round((Date.now() - t0) / 1000) + ' s');
+      }
+    }));
+    const boards = selection.map(b => {
+      const d = JSON.parse(fs.readFileSync(file(b.board), 'utf8'));
+      return { board: b.board, w: +b.w.toFixed(6), tags: b.tags, expl: d.expl };
+    });
+    fs.writeFileSync(FLOP_DIR + '/index.json', JSON.stringify({ tree: TREE, boards }));
+    const bytes = selection.reduce((a, b) => a + fs.statSync(file(b.board)).size, 0);
+    console.log('fertig', (Date.now() - t0) / 1000, 's,', boards.length, 'Boards,', bytes, 'bytes');
   }
 }

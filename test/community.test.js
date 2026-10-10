@@ -9,7 +9,9 @@ import * as C from '../src/core/community.js';
 
 const read = f => JSON.parse(fs.readFileSync(new URL('../public/data/' + f, import.meta.url), 'utf8'));
 const T = makeTables(read('pf-data.json'));
-const ctx = { HU: makeHU(T, { tree: read('hu-tree.json'), strat: read('hu-strat.json') }), flop: read('flop-data.json'), river: read('river-data.json') };
+const flopIdx = read('flop/index.json');
+const flop = { tree: flopIdx.tree, boards: flopIdx.boards.map(b => ({ ...read('flop/' + b.board + '.json'), w: b.w, tags: b.tags })) };
+const ctx = { HU: makeHU(T, { tree: read('hu-tree.json'), strat: read('hu-strat.json') }), flop, river: read('river-data.json') };
 /** Reproduzierbarer Zufall (Park-Miller). */
 const seeded = (x = 7) => () => (x = (x * 16807) % 2147483647) / 2147483647;
 const DAY = 86400000;

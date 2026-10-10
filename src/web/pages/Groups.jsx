@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as K from '../../modes/community.js';
-import { loadData, hu, flopData, riverData } from '../../modes/data.js';
+import { loadData, hu, riverData, loadFlopSample } from '../../modes/data.js';
 import { track, SPOTNAME, spotTitle } from '../../modes/progress.js';
 import { BOARDS, GROUP_MAX, SET_MAX_SPOTS, weekOf } from '../../core/community.js';
 import { SPOT_KEYS, makeSpot, dataNeeds, answer } from '../../core/spots.js';
@@ -223,19 +223,22 @@ export function SetTrainer() {
   const acc = useAccount();
   const info = useLoad(() => acc.user ? K.groupInfo(id) : null, [id, acc.user?.id]);
   const s = info.data?.sets.find(x => x.id === set);
-  const [ready, setReady] = useState(false), [loadErr, setLoadErr] = useState(null);
+  const [flops, setFlops] = useState(null), [ready, setReady] = useState(false), [loadErr, setLoadErr] = useState(null);
   const [spot, setSpot] = useState(null), [choice, setChoice] = useState(null), [tally, setTally] = useState({ n: 0, good: 0, loss: 0 });
   const [saveErr, setSaveErr] = useState(null);
   useEffect(() => {
     if (!s) return;
     let alive = true;
-    loadData(dataNeeds(s.spots)).then(() => alive && setReady(true), e => alive && setLoadErr(e.message));
+    // Flop: Index plus acht Boards nach Häufigkeit (statt aller 60), das reicht für Abwechslung
+    loadData(dataNeeds(s.spots))
+      .then(() => dataNeeds(s.spots).includes('flop') ? loadFlopSample(8) : null)
+      .then(f => { if (alive) { setFlops(f); setReady(true); } }, e => alive && setLoadErr(e.message));
     return () => { alive = false; };
   }, [s?.id]);
   const ctx = useMemo(() => {
     if (!ready) return null;
     const need = dataNeeds(s.spots);
-    return { HU: need.includes('huTree') ? hu() : null, flop: need.includes('flop') ? flopData() : null, river: need.includes('river') ? riverData() : null };
+    return { HU: need.includes('huTree') ? hu() : null, flop: flops, river: need.includes('river') ? riverData() : null };
   }, [ready]);
   const next = () => {
     setChoice(null);
