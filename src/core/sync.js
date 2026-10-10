@@ -64,12 +64,15 @@ export function merge(local, remote) {
 /** true, wenn zwei Stände inhaltlich gleich sind (für „nichts zu tun“). */
 export const same = (x, y) => JSON.stringify(normalize(x)) === JSON.stringify(normalize(y));
 
-/** Öffentliche Kennzahlen für das Profil: Ratings je Modus und Gesamt-Rating. */
+/** Öffentliche Kennzahlen für das Profil: Ratings und Entscheidungen je Modus (für die Ranglisten), Gesamt-Rating. */
 export function publicStats(state) {
-  const s = normalize(state), ratings = {};
+  const s = normalize(state), ratings = {}, counts = {};
   let w = 0, sum = 0;
-  for (const k of MODES) { if (s[k].n) { ratings[k] = Math.round(s[k].rating); sum += s[k].rating * s[k].n; w += s[k].n; } }
-  return { ratings, overall: w ? Math.round(sum / w) : null, decisions: summary(s).decisions };
+  for (const k of MODES) {
+    if (s[k].n) { ratings[k] = Math.round(s[k].rating); sum += s[k].rating * s[k].n; w += s[k].n; }
+    if (s[k].accN) counts[k] = s[k].accN;
+  }
+  return { ratings, counts, overall: w ? Math.round(sum / w) : null, decisions: summary(s).decisions };
 }
 
 /** Prüft einen Anzeigenamen; liefert eine Fehlermeldung oder null. */

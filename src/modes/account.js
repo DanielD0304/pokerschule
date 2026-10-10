@@ -188,8 +188,9 @@ async function flushOutbox(sb, uid) {
 
 async function pushProfileStats(sb, uid) {
   const p = publicStats(state), cur = status.profile;
-  if (!cur || (cur.rating === p.overall && cur.decisions === p.decisions && JSON.stringify(cur.ratings) === JSON.stringify(p.ratings))) return;
-  const [profile] = check(await sb.from('profiles').update({ rating: p.overall, ratings: p.ratings, decisions: p.decisions }).eq('id', uid).select('*'));
+  const same = (x, y) => JSON.stringify(x ?? {}) === JSON.stringify(y ?? {});
+  if (!cur || (cur.rating === p.overall && cur.decisions === p.decisions && same(cur.ratings, p.ratings) && same(cur.counts, p.counts))) return;
+  const [profile] = check(await sb.from('profiles').update({ rating: p.overall, ratings: p.ratings, counts: p.counts, decisions: p.decisions }).eq('id', uid).select('*'));
   if (profile) set({ profile });
 }
 
@@ -227,7 +228,7 @@ export async function deleteAccount() {
 /** Öffentliches Profil nach Anzeigename (für /spieler/:name). */
 export async function publicProfile(name) {
   const sb = await client();
-  return check(await sb.from('profiles').select('display_name, avatar, rating, ratings, decisions, online, created_at').ilike('display_name', name.replace(/[%_\\]/g, c => '\\' + c)).eq('is_public', true).maybeSingle());
+  return check(await sb.from('profiles').select('display_name, avatar, rating, ratings, counts, decisions, online, weekly, created_at').ilike('display_name', name.replace(/[%_\\]/g, c => '\\' + c)).eq('is_public', true).maybeSingle());
 }
 
 /** Lokale Sicherung vom ersten Verbinden, falls vorhanden. */

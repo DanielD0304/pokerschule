@@ -1,5 +1,5 @@
 // Kopiert die Kernlogik und die Solver-Daten, die der Server braucht, nach supabase/functions/_shared.
-// Edge Functions werden ohne den Rest des Repositorys gebündelt; so rechnen Server und Website identisch.
+// Edge Functions (online, challenge) werden ohne den Rest des Repositorys gebündelt; so rechnen Server und Website identisch.
 // Aufruf: npm run functions:sync   (mit --check nur prüfen, ob die Kopie aktuell ist)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +9,9 @@ export const FILES = {
   'src/core/online.js': 'core/online.js', 'src/core/cards.js': 'core/cards.js', 'src/core/evaluator.js': 'core/evaluator.js',
   'src/core/equity.js': 'core/equity.js', 'src/core/rating.js': 'core/rating.js', 'src/core/pushfold.js': 'core/pushfold.js',
   'src/core/hutree.js': 'core/hutree.js', 'src/core/preflop.js': 'core/preflop.js',
+  'src/core/spots.js': 'core/spots.js', 'src/core/community.js': 'core/community.js',
   'public/data/pf-data.json': 'data/pf-data.json', 'public/data/hu-tree.json': 'data/hu-tree.json', 'public/data/hu-strat.json': 'data/hu-strat.json',
+  'public/data/flop-data.json': 'data/flop-data.json', 'public/data/river-data.json': 'data/river-data.json',
 };
 const root = new URL('../', import.meta.url), dest = new URL('supabase/functions/_shared/', root);
 
