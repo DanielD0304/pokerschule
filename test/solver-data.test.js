@@ -13,6 +13,7 @@ const read = f => JSON.parse(fs.readFileSync(new URL('../public/data/' + f, impo
 const pf = read('pf-data.json'), huStrat = read('hu-strat.json'), huTree = read('hu-tree.json');
 const flop = read('flop/index.json'), river = read('river-data.json');
 const flopBoards = flop.boards.map(b => read('flop/' + b.board + '.json'));
+const turn = read('turn/index.json'), turnSpots = turn.spots.map(t => read('turn/' + t.spot + '.json'));
 const T = makeTables(pf);
 const near1 = (a, eps = .011) => Math.abs(a.reduce((x, y) => x + y, 0) - 1) <= eps;
 
@@ -93,6 +94,22 @@ test('Flop-Daten: 60 Boards nach Typ, Strategien, EV, Lösungsgüte', () => {
       }
     }
   }
+});
+
+test('Turn-Daten: ein Spot je Flop-Board, Strategien, EV, höchstens 0,3 % des Pots ausnutzbar', () => {
+  assert.deepEqual(turn.spots.map(t => [t.flop, t.w]), flop.boards.map(b => [b.board, b.w]));
+  turn.spots.forEach((m, i) => {
+    const d = turnSpots[i], cards = new Set(Array.from({ length: 4 }, (_, k) => d.board.slice(2 * k, 2 * k + 2)));
+    assert.equal(d.board, m.spot); assert.equal(d.board.slice(0, 6), m.flop); assert.equal(cards.size, 4);
+    assert.equal(d.expl, m.expl); assert.ok(d.expl >= 0 && d.expl <= .3, `${d.board}: ${d.expl} % Pot`);
+    assert.ok([8.3, 12.5].includes(d.P) && ['b33', 'b75'].includes(d.line));
+    for (const [id, n] of Object.entries(d.tree)) if (!n.t) {
+      const side = n.p === 'SB' ? d.sb : d.bb, A = n.a.length;
+      assert.equal(d.n[id].s.length, side.c.length * A);
+      assert.ok(d.n[id].e.every(Number.isFinite));
+      for (let h = 0; h < side.c.length; h += 29) assert.ok(near1(d.n[id].s.slice(h * A, h * A + A).map(x => x / 100), .03), `${d.board} ${id} Zeile ${h}`);
+    }
+  });
 });
 
 test('River-Daten: 24 Spots, höchstens 0,1 % des Pots ausnutzbar', () => {

@@ -11,7 +11,7 @@ Die Website ist eine React-App (Vite). Der Fortschritt liegt im Browser; mit ein
 | Start `/` | Empfehlung aus deinen Lecks, Ratings, Schnellstart |
 | Spielen `/spielen` | Push/Fold-Arena (Match gegen Freizeitspieler- oder Nash-Bot), Preflop-Duell mit 100 BB |
 | Online `/spielen/online` | Heads-up gegen Menschen (Push/Fold, Preflop-Duell), glücksbereinigtes Rating, Einladung per Link, Revanche, Analyse beider Spieler, Match-Verlauf |
-| Training `/training` | Flop, River (exakt gelöst), Fehler-Training, Quiz: Wer gewinnt?, Raise oder Fold?, Pot Odds |
+| Training `/training` | Flop (60 Boards nach Typ), Turn (samt River gelöst), River (exakt gelöst), Fehler-Training, Quiz: Wer gewinnt?, Raise oder Fold?, Pot Odds |
 | Lernen `/lernen` | Ablauf einer Hand, Rangfolge, Open-Raise-Ranges |
 | Statistik `/statistik` | Ratings, Genauigkeit, größte Lecks, Aktivität, Sichern/Laden, Zurücksetzen |
 | Rangliste `/rangliste` | Ranglisten je Modus und gesamt, für alle, Freunde oder eine Gruppe; Zuwachs dieser Woche und dieses Monats; Referenzspieler; Abzeichen |
@@ -89,10 +89,11 @@ Die Skripte in `solver/` erzeugen die Daten in `public/data/` neu:
 | `precompute.js [samples]` | `pf-data.json` | Preflop-Equity für alle 169×169 Starthände (Monte Carlo) und Push/Fold-Nash für 2–20 BB |
 | `cfr.js [iter]` | `hu-strat.json` | Heads-up-Preflop mit 100 BB per CFR+. Den Baum beschreibt `data/hu-tree.json`. |
 | `flopsolve.js [iter] [--fehlende]` | `flop/index.json`, `flop/<board>.json` | Flop-CFR+ auf Kombo-Ebene für 60 Boards nach Typ (Auswahl und Gewichte: `src/core/flops.js`), eine Datei je Board, mit Lösungsgüte; `--fehlende` setzt einen abgebrochenen Lauf fort |
+| `turnsolve.js [iter] [--fehlende]` | `turn/index.json`, `turn/<spot>.json` | 60 Turn-Spots (je Flop-Board eine Turn-Karte), gelöst samt River-Spiel auf allen 44 River-Karten; gespeichert werden die Turn-Entscheidungen |
 | `riversolve.js [iter]` | `river-data.json` | 24 River-Spots auf den 12 festen Flop-Boards, exakt gelöst, mit Lösungsgüte je Spot |
 
 ```bash
-npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schreibt nach public/data/
+npm run solve     # alle fünf Solver nacheinander (etwa 1 Stunde, davon Turn ~50 Min. auf 16 Threads), schreibt nach public/data/
 ```
 
 **Lösungsgüte** heißt: So viel Prozent des Pots könnte ein perfekter Gegenspieler im Schnitt gegen die Strategie gewinnen. Aktuell liegen alle River-Spots bei höchstens 0,1 % und alle Flop-Boards unter 0,01 % des Pots (im Rahmen des jeweiligen Modells). Die Werte stehen in den Daten und in jeder Analyse.
@@ -102,6 +103,7 @@ npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schre
 - **Preflop-Quiz (6-max):** Faustregel-Ranges, nicht vom Solver berechnet.
 - **Preflop (100 BB):** vereinfachter Spielbaum ohne Limps, feste Einsatzgrößen (2,5 / 10 / 22 / all-in). Nach dem Flop wird nicht weitergespielt, sondern über Equity-Realisierung bewertet.
 - **Flop:** 60 Boards vertreten alle 22 100 Flops; jedes steht für eine Gruppe ähnlicher Flops und wird so oft gezogen, wie diese vorkommt. Innerhalb einer Gruppe kann die richtige Strategie abweichen. Turn und River werden nicht ausgespielt. Das Modell bevorzugt deshalb große Bets und raist öfter als echte Solver.
+- **Turn:** Turn und River sind für den Spielbaum exakt gelöst; trainiert wird nur die Turn-Entscheidung. Geht eine Hand zum River, zählt für die EV-Bilanz die Equity ohne weiteres Setzen. Die Ranges stammen aus den vereinfachten früheren Stufen.
 - **River:** Die Lösung ist exakt für diesen Baum, aber die Ranges stammen aus den vereinfachten früheren Stufen. Die Turn-Linie Check-Check ist fest vorgegeben.
 
 ## Rechtliches

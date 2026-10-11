@@ -22,6 +22,7 @@ import * as M from './markup.js';
 import { mountArena } from '../modes/arena.js';
 import { mountDuel } from '../modes/duel.js';
 import { mountFlop } from '../modes/flop.js';
+import { mountTurn } from '../modes/turn.js';
 import { mountRiver } from '../modes/river.js';
 import { mountReview } from '../modes/review.js';
 import { mountShow, mountPre, mountOdds, mountRanking, mountRanges } from '../modes/quiz.js';
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="spielen/online/match/:id" element={<MatchPage />} />
         <Route path="training" element={<TrainHub />} />
         <Route path="training/flop" element={<ModePage back={TRAINING} title="Flop-Training" intro="Single-Raised-Pot, 100 BB: Der Small Blind hat erhöht, der Big Blind gecallt. Du spielst abwechselnd beide Seiten auf 60 Flops, die zusammen alle Board-Typen abdecken; mit dem Filter übst du gezielt einen Typ."><ModeHost html={M.FLOP} mount={mountFlop} needs={NEEDS.flop} /></ModePage>} />
+        <Route path="training/turn" element={<ModePage back={TRAINING} title="Turn-Training" intro="Single-Raised-Pot, 100 BB, nach C-Bet und Call auf dem Flop: zweite Barrel, Check-Back oder Verteidigen gegen Turn-Bets. Gelöst samt River-Spiel auf allen River-Karten."><ModeHost html={M.TURN} mount={mountTurn} needs={NEEDS.turn} /></ModePage>} />
         <Route path="training/river" element={<ModePage back={TRAINING} title="River-Training" intro="Die letzte Setzrunde, exakt gelöst: Value-Bets, Bluffs, Bluff-Catcher und Einsatzgrößen bis zum Overbet."><ModeHost html={M.RIVER} mount={mountRiver} needs={NEEDS.river} /></ModePage>} />
         <Route path="training/fehler" element={<ModePage back={TRAINING} title="Fehler-Training" intro="Situationen, in denen du daneben lagst, kommen wieder. Dreimal in Folge richtig, und sie ist gemeistert. Das Rating ändert sich hier nicht."><ModeHost html={M.REVIEW} mount={mountReview} /></ModePage>} />
         <Route path="training/showdown" element={<ModePage back={TRAINING} title="Wer gewinnt?" intro="Jeder nutzt die besten 5 von 7 Karten. Achte auf Kicker, Flush-Möglichkeiten und geteilte Pots."><ModeHost html={M.SHOW} mount={mountShow} /></ModePage>} />

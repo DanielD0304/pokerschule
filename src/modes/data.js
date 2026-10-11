@@ -5,9 +5,9 @@ import { makeBots } from '../core/pushfold.js';
 import { pickBoard } from '../core/flops.js';
 
 const BASE = (import.meta.env?.BASE_URL || '/') + 'data/';
-const FILES = { pf: 'pf-data.json', huTree: 'hu-tree.json', huStrat: 'hu-strat.json', flop: 'flop/index.json', river: 'river-data.json' };
+const FILES = { pf: 'pf-data.json', huTree: 'hu-tree.json', huStrat: 'hu-strat.json', flop: 'flop/index.json', turn: 'turn/index.json', river: 'river-data.json' };
 /** Welche Dateien ein Modus braucht. */
-export const NEEDS = { arena: ['pf'], duel: ['pf', 'huTree', 'huStrat'], flop: ['flop'], river: ['river'] };
+export const NEEDS = { arena: ['pf'], duel: ['pf', 'huTree', 'huStrat'], flop: ['flop'], turn: ['turn'], river: ['river'] };
 const raw = {}, pending = {};
 
 function fetchOne(key) {
@@ -55,3 +55,19 @@ export async function loadFlopSample(n = 8, rand = Math.random) {
   return { tree: idx.tree, boards: await Promise.all(pick.map(loadFlopBoard)) };
 }
 export const riverData = () => need('river');
+
+/** Übersicht der Turn-Spots (je Flop-Board einer): Name, Flop, Gewicht, Pot, Linie, Lösungsgüte. */
+export const turnIndex = () => need('turn');
+const turns = new Map(), turnPending = new Map();
+export const turnSpot = spot => turns.get(spot) ?? null;
+/** Lädt die Lösung eines Turn-Spots (~100 KB), erst wenn er ausgeteilt wird. */
+export function loadTurnSpot(spot) {
+  if (turns.has(spot)) return Promise.resolve(turns.get(spot));
+  if (!turnPending.has(spot)) {
+    turnPending.set(spot, fetch(BASE + 'turn/' + spot + '.json').then(r => {
+      if (!r.ok) throw new Error(`Turn-Spot ${spot} konnte nicht geladen werden (${r.status})`);
+      return r.json();
+    }).then(d => { turns.set(spot, d); turnPending.delete(spot); return d; }).catch(e => { turnPending.delete(spot); throw e; }));
+  }
+  return turnPending.get(spot);
+}

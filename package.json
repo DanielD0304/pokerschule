@@ -18,8 +18,9 @@
     "solve:preflop": "node solver/precompute.js 30000",
     "solve:hu": "node solver/cfr.js 3000",
     "solve:flop": "node solver/flopsolve.js 1000",
+    "solve:turn": "node solver/turnsolve.js 600",
     "solve:river": "node solver/riversolve.js 1500",
-    "solve": "npm run solve:preflop && npm run solve:hu && npm run solve:flop && npm run solve:river"
+    "solve": "npm run solve:preflop && npm run solve:hu && npm run solve:flop && npm run solve:turn && npm run solve:river"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.2.17",

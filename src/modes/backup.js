@@ -22,7 +22,7 @@ function showText() { $('bk-text').hidden = false; $('bk-area').value = exportSt
 function confirmImport(text) {
   let next;
   try { next = importState(text); } catch (e) { message(e.message, 'bad-text'); return; }
-  const hands = ['arena', 'duel', 'flop', 'river'].reduce((s, k) => s + (next[k].hands || 0), 0), open = next.review.items.length;
+  const hands = ['arena', 'duel', 'flop', 'turn', 'river'].reduce((s, k) => s + (next[k].hands || 0), 0), open = next.review.items.length;
   $('bk-msg').innerHTML = `<p>Die Datei enthält ${hands === 1 ? 'eine gespielte Hand' : hands + ' gespielte Hände'} und ${open === 1 ? 'einen offenen Fehler' : open + ' offene Fehler'}. <b>Dein aktueller Fortschritt in diesem Browser wird dabei ersetzt.</b></p>
     <div class="actions" style="justify-content:flex-start"><button class="btn primary" id="bk-yes">Ersetzen und neu laden</button><button class="btn" id="bk-no">Abbrechen</button></div>`;
   $('bk-yes').onclick = () => { replaceState(next); location.reload(); };

@@ -11,6 +11,7 @@ export const BOARDS = {
   arena: { name: 'Push/Fold-Arena', short: 'Arena', unit: 'Entscheidungen' },
   duel: { name: 'Preflop-Duell', short: 'Duell', unit: 'Entscheidungen' },
   flop: { name: 'Flop-Training', short: 'Flop', unit: 'Entscheidungen' },
+  turn: { name: 'Turn-Training', short: 'Turn', unit: 'Entscheidungen' },
   river: { name: 'River-Training', short: 'River', unit: 'Entscheidungen' },
   online_pf: { name: 'Online Push/Fold', short: 'Online P/F', unit: 'Matches', online: 'pf' },
   online_duel: { name: 'Online Preflop-Duell', short: 'Online Duell', unit: 'Matches', online: 'duel' },

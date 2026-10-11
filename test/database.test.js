@@ -213,3 +213,14 @@ await t('Konto löschen entfernt Freundschaften und Einträge', async () => {
   eq((await q(`select count(*)::int as n from public.weekly_entries where user_id = '${B}'`))[0].n, 0);
   eq((await q(`select count(*)::int as n from public.rating_history where user_id = '${B}'`))[0].n, 0);
 });
+
+// ---------- Turn-Training (Migration turn) ----------
+await t('Turn als Modus: Entscheidungen, Rangliste, unbekannte Modi weiter abgewiesen', async () => {
+  await db.exec(`insert into auth.users (id) values ('00000000-0000-0000-0000-0000000000e1');
+    update public.profiles set display_name = 'Turni', is_public = true where id = '00000000-0000-0000-0000-0000000000e1';`);
+  const E = '00000000-0000-0000-0000-0000000000e1';
+  await as(E, () => q(`insert into public.decisions (id, mode, spot, grade, ev_loss, made_at) values (gen_random_uuid(), 'turn', 'turn:u_ip', 'best', 0, now())`));
+  await fails(() => as(E, () => q(`insert into public.decisions (id, mode, spot, grade, ev_loss, made_at) values (gen_random_uuid(), 'preflop6', 'x', 'best', 0, now())`)), /check/);
+  await as(E, () => q(`update public.profiles set ratings = '{"turn":1600}', counts = '{"turn":250}' where id = auth.uid()`));
+  eq((await as(null, () => q(`select name, rating from public.leaderboard('turn')`))), [{ name: 'Turni', rating: 1600 }]);
+});

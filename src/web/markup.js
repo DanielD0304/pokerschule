@@ -65,6 +65,24 @@ export const FLOP = `
   </aside>
 </div>`;
 
+export const TURN = `
+<div class="game">
+  <div class="game-main">
+    <div class="table" id="tu-table"></div>
+    <p class="prompt" id="tu-prompt"></p>
+    <div class="actions" id="tu-actions"></div>
+  </div>
+  <aside class="game-side" aria-label="Analyse">
+    <div id="tu-fb"></div>
+    <div class="side-stats" id="tu-stats"></div>
+    <section class="box"><h3>Letzte Hände</h3><div class="log" id="tu-log"></div></section>
+    ${sideInfo('Wie funktioniert der Bot?', `
+      <p>Für jeden der 60 Flops gibt es eine Turn-Situation. Gelöst ist sie samt River: Auf jeder der 44 möglichen River-Karten wird noch einmal gesetzt (Check, ⅓, ¾, Overbet, Raise auf das Dreifache), und der Bot spielt auf dem Turn so, dass das beste River-Spiel schon eingerechnet ist. Ein perfekter Gegner könnte die Strategie um höchstens wenige Zehntelprozent des Pots ausnutzen.</p>
+      <p>Die Ranges entstehen aus den Vorstufen (Raise, Call; C-Bet, Call). Einsätze am Turn: Big Blind checkt oder setzt ½ Pot; Small Blind checkt oder setzt ⅓, ¾ oder 1,5× Pot; Raise auf das Dreifache.</p>
+      <p>Trainiert wird die Turn-Entscheidung. Geht die Hand zum River, endet sie dort; für die EV-Bilanz zählt deine Equity gegen die Hand des Bots ohne weiteres Setzen.</p>`)}
+  </aside>
+</div>`;
+
 export const RIVER = `
 <div class="game">
   <div class="game-main">

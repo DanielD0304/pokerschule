@@ -16,7 +16,7 @@ export function defaults() {
     quiz: { show: { c: 0, t: 0 }, pre: { c: 0, t: 0 }, odds: { c: 0, t: 0 }, streak: 0, best: 0 },
     arena: { ...modeState(), real: 0, m: 0, mw: 0 },
     match: null,
-    duel: modeState(), flop: modeState(), river: modeState(),
+    duel: modeState(), flop: modeState(), turn: modeState(), river: modeState(),
     dash: { spots: {}, days: {} },
     review: { items: [], mastered: 0, seq: 0, today: null },
     ui: { tab: null, ageOk: false },
