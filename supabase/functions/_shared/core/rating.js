@@ -7,7 +7,8 @@ export const QUAL = {
 };
 export const GOOD = new Set(['best', 'sharp', 'eq']);
 /** Schwierigkeits-Konstante je Modus (aus der Kalibrierung mit simulierten Spielern). */
-export const K_DIFF = { arena: .4, duel: .4, flop: .2, river: .4 };
+// Turn: vorläufig wie River (ähnliche Pot-Größen und EV-Abstände), noch nicht eigens kalibriert.
+export const K_DIFF = { arena: .4, duel: .4, flop: .2, turn: .4, river: .4 };
 export const START_RATING = 1000;
 
 /**

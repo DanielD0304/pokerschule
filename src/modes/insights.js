@@ -5,6 +5,7 @@ export const MODES = [
   { k: 'arena', name: 'Push/Fold-Arena', path: '/spielen/arena' },
   { k: 'duel', name: 'Preflop-Duell', path: '/spielen/duell' },
   { k: 'flop', name: 'Flop-Training', path: '/training/flop' },
+  { k: 'turn', name: 'Turn-Training', path: '/training/turn' },
   { k: 'river', name: 'River-Training', path: '/training/river' },
 ];
 /** Pfad zu einer Situation wie 'flop:f_ip'. */

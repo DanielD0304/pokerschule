@@ -3,7 +3,7 @@
 // Hat ein Stand eine neuere Epoche (zurückgesetzt oder importiert), gewinnt er ganz.
 import { normalize } from './storage.js';
 
-const MODES = ['arena', 'duel', 'flop', 'river'];
+const MODES = ['arena', 'duel', 'flop', 'turn', 'river'];
 const MAX_REVIEW = 200;
 const clone = o => JSON.parse(JSON.stringify(o));
 const quizN = q => q.show.t + q.pre.t + q.odds.t;
