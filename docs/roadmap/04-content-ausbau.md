@@ -88,9 +88,9 @@ Grenze: Innerhalb einer Gruppe ähnlicher Flops kann die beste Strategie abweich
 
 ### B-03 im Einzelnen
 
-- **Solver** (): Turn samt River auf allen 44 River-Karten, CFR+ mit abwechselnden Updates. River-Baum: Check, ⅓, ¾, Overbet, Raise auf das Dreifache, Einsätze auf den Stack begrenzt. Showdown über sortierte Ränge mit Karten-Blockern statt Hand gegen Hand (gegen Brute Force geprüft). Gespeichert werden nur die Turn-Entscheidungen.
+- **Solver** (`solver/turnsolve.js`): Turn samt River auf allen 44 River-Karten, CFR+ mit abwechselnden Updates. River-Baum: Check, ⅓, ¾, Overbet, Raise auf das Dreifache, Einsätze auf den Stack begrenzt. Showdown über sortierte Ränge mit Karten-Blockern statt Hand gegen Hand (gegen Brute Force geprüft). Gespeichert werden nur die Turn-Entscheidungen.
 - **Spots**: je Flop-Board eine Turn-Karte (60 Spots, zusammen 4,5 MB, etwa 75 KB je Spot), Ranges aus der Flop-Lösung (BB checkt, SB setzt die häufigere C-Bet-Größe, BB callt). Gezogen nach Häufigkeit des Flops, geladen erst beim Austeilen.
 - **Lösungsgüte**: 0,066 bis 0,272 % des Pots, Median 0,178 % (600 Iterationen, rund 100 Minuten auf 16 Threads).
 - **Seltene Linien**: Führt der BB im Gleichgewicht nie, lernte der SB ohne Gegenmaßnahme keine sinnvolle Antwort (Fold mit zwei Paaren). Abklingendes „Zittern“ in der ersten Hälfte der Iterationen behebt das weitgehend; Restunschärfe gegen Leads im Mittel 0,15 bis 0,3 BB je Hand. Im Modellhinweis vermerkt.
-- **App**: , bewerteter Modus mit Rating, Statistik, Rangliste und Freundesvergleich (Migration ). Geht eine Hand zum River, endet sie dort; die EV-Bilanz rechnet ohne weiteres Setzen, die EVs der Entscheidungen mit dem River-Spiel.
-- Offen:  ist vorläufig wie beim River gesetzt, nicht eigens kalibriert.
+- **App**: `/training/turn`, bewerteter Modus mit Rating, Statistik, Rangliste und Freundesvergleich (Migration `20261012000000_turn.sql`). Geht eine Hand zum River, endet sie dort; die EV-Bilanz rechnet ohne weiteres Setzen, die EVs der Entscheidungen mit dem River-Spiel.
+- Offen: `K_DIFF.turn` ist vorläufig wie beim River gesetzt, nicht eigens kalibriert.
