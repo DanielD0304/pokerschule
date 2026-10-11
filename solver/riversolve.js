@@ -6,6 +6,18 @@ import { cardFromStr as card, cardStr as cstr } from '../src/core/cards.js';
 import { eval7 } from '../src/core/evaluator.js';
 import { DATA_DIR, FLOP_DIR, FIXED } from './paths.js';
 
+/**
+ * „Zittern“ wie im Turn-Solver: Beim Weitergeben der Reichweite spielt jeder Spieler jede Aktion mit mindestens ε / Zahl der Aktionen.
+ * Sonst bekommt r_vsLead kein Lernsignal, wenn der BB im Gleichgewicht nie führt, und die SB-Antwort dort bleibt unsinnig.
+ * ε beginnt bei EPS0 und sinkt in der ersten Hälfte der Iterationen linear auf 0; die zweite Hälfte rechnet exakt.
+ * Ausnahme r_root: Dort bleibt ε mindestens EPS_EV. Ohne diese Untergrenze lernt der SB an r_vsLead in der zweiten Hälfte
+ * nur aus den zufälligen Leads der aktuellen BB-Strategie (meist Nuts) und foldet zu viel.
+ * Die Durchschnittsstrategie zählt erst ab AVG0 · N (die gezitterten Iterationen verschlechtern sonst die Lösungsgüte).
+ * Die EVs je Aktion werden mit EPS_EV ausgewertet, die Lösungsgüte exakt.
+ */
+export const EPS0 = +(process.env.RIVER_EPS ?? .05), EPS_EV = .005, AVG0 = .75;
+export const epsAt = (it, N, id) => Math.max(id === 'r_root' ? EPS_EV : 0, EPS0 * Math.max(0, 1 - it / (N / 2)));
+
 // Baum relativ zum Pot P, Einsatz pro Spieler vor dem River I0 = P/2
 function buildTree(P) {
   const I0 = P / 2, r2 = x => Math.round(x * 100) / 100;
@@ -56,41 +68,43 @@ function solve({ spot, N }) {
   const R = {}, SS = {}, EVS = {};
   for (const [id, n] of Object.entries(TREE)) if (!n.t) { const m = n.p === 'SB' ? nS : nB; R[id] = new Float64Array(m * n.a.length); SS[id] = new Float64Array(m * n.a.length); }
   const sigma = (id, m, A, avg) => { const src = avg ? SS[id] : R[id], o = new Float64Array(m * A); for (let h = 0; h < m; h++) { let s = 0; for (let a = 0; a < A; a++) s += src[h * A + a]; for (let a = 0; a < A; a++) o[h * A + a] = s > 0 ? src[h * A + a] / s : 1 / A; } return o; };
-  function walk(id, rs, rb, it, avg) {
+  // mode: 'cfr0'/'cfr1' (Regrets von SB bzw. BB fortschreiben), 'avg' (Durchschnitt mit Zittern auswerten, EVs merken),
+  // 'val' (Durchschnitt ohne Zittern, für die Lösungsgüte), ['br', p] (Best Response von p, ohne Zittern)
+  function walk(id, rs, rb, it, mode) {
     const n = TREE[id]; if (n.t) return term(n, rs, rb);
-    const p = n.p === 'SB' ? 0 : 1, m = p ? nB : nS, A = n.a.length, sg = sigma(id, m, A, avg);
+    const p = n.p === 'SB' ? 0 : 1, m = p ? nB : nS, A = n.a.length;
+    const br = Array.isArray(mode) && mode[1] === p;
+    const cfr = mode === 'cfr0' || mode === 'cfr1';
+    const sg = sigma(id, m, A, !cfr), eps = cfr ? epsAt(it, N, id) : mode === 'avg' ? EPS_EV : 0;
     const uS = new Float64Array(nS), uB = new Float64Array(nB), ua = [];
     for (let a = 0; a < A; a++) {
-      const my = p ? rb : rs, r2 = new Float64Array(m); for (let h = 0; h < m; h++) r2[h] = my[h] * sg[h * A + a];
-      const [cs, cb] = p ? walk(n.c[a], rs, r2, it, avg) : walk(n.c[a], r2, rb, it, avg);
+      const my = p ? rb : rs, rr = new Float64Array(m); for (let h = 0; h < m; h++) rr[h] = br ? my[h] : my[h] * (sg[h * A + a] * (1 - eps) + eps / A);
+      const [cs, cb] = p ? walk(n.c[a], rs, rr, it, mode) : walk(n.c[a], rr, rb, it, mode);
       ua.push(p ? cb : cs);
+      if (br) continue;
       for (let h = 0; h < nS; h++) uS[h] += p ? cs[h] : sg[h * A + a] * cs[h];
       for (let h = 0; h < nB; h++) uB[h] += p ? sg[h * A + a] * cb[h] : cb[h];
     }
-    const u = p ? uB : uS, my = p ? rb : rs;
-    if (avg) { const norm = p ? mvB(C, rs) : mvS(C, rb); const ev = new Float64Array(m * A);
+    if (br) { // beste Aktion je Hand; der andere Vektor ist für den Best Responder egal
+      const u = new Float64Array(m); for (let h = 0; h < m; h++) { let v = -Infinity; for (let a = 0; a < A; a++) v = Math.max(v, ua[a][h]); u[h] = v; }
+      return p ? [new Float64Array(nS), u] : [u, new Float64Array(nB)];
+    }
+    if (mode === 'avg') { const norm = p ? mvB(C, rs) : mvS(C, rb); const ev = new Float64Array(m * A);
       for (let h = 0; h < m; h++) for (let a = 0; a < A; a++) ev[h * A + a] = norm[h] > 1e-9 ? ua[a][h] / norm[h] : 0; EVS[id] = ev; return [uS, uB]; }
-    for (let h = 0; h < m; h++) for (let a = 0; a < A; a++) { const k = h * A + a; R[id][k] = Math.max(0, R[id][k] + ua[a][h] - u[h]); SS[id][k] += it * my[h] * sg[k]; }
+    if (mode === 'cfr' + p) { const u = p ? uB : uS, my = p ? rb : rs;
+      for (let h = 0; h < m; h++) for (let a = 0; a < A; a++) { const k = h * A + a; R[id][k] = Math.max(0, R[id][k] + ua[a][h] - u[h]); SS[id][k] += Math.max(0, it - AVG0 * N) * my[h] * sg[k]; } }
     return [uS, uB];
   }
   const rs0 = Float64Array.from(SW), rb0 = Float64Array.from(BW);
-  for (let it = 1; it <= N; it++) { walk('r_root', rs0, rb0, it, false); walk('r_root', rs0, rb0, it, false); }
-  walk('r_root', rs0, rb0, 0, true);
-  // Exploitability-Schätzung über Best Response
-  function br(id, p, rs, rb) { // Wert des Best Responders p (Vektor), Gegner spielt Durchschnitt
-    const n = TREE[id]; if (n.t) { const [a, b] = term(n, rs, rb); return p ? b : a; }
-    const q = n.p === 'SB' ? 0 : 1, A = n.a.length;
-    if (q === p) { let best = null; for (let a = 0; a < A; a++) { const v = br(n.c[a], p, rs, rb); best = best ? best.map((x, h) => Math.max(x, v[h])) : v; } return best; }
-    const m = q ? nB : nS, sg = sigma(id, m, A, true); let acc = null;
-    for (let a = 0; a < A; a++) { const my = q ? rb : rs, r2 = new Float64Array(m); for (let h = 0; h < m; h++) r2[h] = my[h] * sg[h * A + a];
-      const v = q ? br(n.c[a], p, rs, r2) : br(n.c[a], p, r2, rb); acc = acc ? acc.map((x, h) => x + v[h]) : Array.from(v); }
-    return acc; }
-  const brS = br('r_root', 0, rs0, rb0), brB = br('r_root', 1, rs0, rb0);
-  const [eqS, eqB] = walk('r_root', rs0, rb0, 0, true);
-  const tot = rs0.reduce((x, y, s) => x + y * mvS(C, rb0)[s], 0);
-  const gainS = brS.reduce((x, v, s) => x + rs0[s] * v, 0) - eqS.reduce((x, v, s) => x + rs0[s] * v, 0);
-  const gainB = brB.reduce((x, v, b) => x + rb0[b] * v, 0) - eqB.reduce((x, v, b) => x + rb0[b] * v, 0);
-  const expl = (gainS + gainB) / 2 / tot / P * 100; // % des Pots
+  // abwechselnde Updates: je Iteration erst die Regrets des SB, dann die des BB; Durchschnitt erst ab AVG0 · N
+  for (let it = 1; it <= N; it++) { walk('r_root', rs0, rb0, it, 'cfr0'); walk('r_root', rs0, rb0, it, 'cfr1'); }
+  walk('r_root', rs0, rb0, 0, 'avg'); // EVs je Aktion (gegen leicht zitternde Gegner, auch an seltenen Knoten stabil)
+  // Lösungsgüte: Gewinn eines perfekten Gegenspielers in % des Pots, exakt ohne Zittern
+  const [eqS, eqB] = walk('r_root', rs0, rb0, 0, 'val');
+  const brS = walk('r_root', rs0, rb0, 0, ['br', 0])[0], brB = walk('r_root', rs0, rb0, 0, ['br', 1])[1];
+  const cS0 = mvS(C, rb0), tot = rs0.reduce((x, y, s) => x + y * cS0[s], 0);
+  const dot = (w, v) => w.reduce((x, y, i) => x + y * v[i], 0);
+  const expl = ((dot(rs0, brS) - dot(rs0, eqS)) + (dot(rb0, brB) - dot(rb0, eqB))) / 2 / tot / P * 100; // % des Pots
   const out = { board: boardStr + cstr(turn) + cstr(river), P, line, tree: TREE, expl: +expl.toFixed(3),
     sb: { c: S.map(([a, b]) => a * 52 + b), w: SW.map(w => Math.round(w * 1000)) }, bb: { c: B.map(([a, b]) => a * 52 + b), w: BW.map(w => Math.round(w * 1000)) }, n: {} };
   for (const [id, n] of Object.entries(TREE)) if (!n.t) { const m = n.p === 'SB' ? nS : nB, A = n.a.length, sg = sigma(id, m, A, true);
