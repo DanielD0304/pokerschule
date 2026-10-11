@@ -97,6 +97,8 @@ npm run solve     # alle vier Solver nacheinander (etwa 5 bis 20 Minuten), schre
 
 **Lösungsgüte** heißt: So viel Prozent des Pots könnte ein perfekter Gegenspieler im Schnitt gegen die Strategie gewinnen. Aktuell liegen alle River-Spots bei höchstens 0,1 % und alle Flop-Boards unter 0,01 % des Pots (im Rahmen des jeweiligen Modells). Die Werte stehen in den Daten und in jeder Analyse.
 
+**Seltene Knoten am River:** Führt der BB im Gleichgewicht nie, lernt der SB an `r_vsLead` sonst nichts und antwortet unsinnig. Der River-Solver lässt deshalb, wie der Turn-Solver, jeden Spieler beim Weitergeben der Reichweite jede Aktion mit mindestens ε / Zahl der Aktionen spielen („Zittern“): ε sinkt in der ersten Hälfte der Iterationen von 0,05 auf 0, nur die Lead-Entscheidung des BB behält mindestens 0,005. Dazu kommen abwechselnde Updates (erst SB, dann BB), und die Durchschnittsstrategie zählt erst ab drei Vierteln der Iterationen. EVs je Aktion werden mit ε = 0,005 ausgewertet, die Lösungsgüte exakt ohne Zittern. Ergebnis mit 1500 Iterationen: Lösungsgüte höchstens 0,074 % des Pots, und eine SB-Hand verliert an `r_vsLead` im Mittel 0,03 BB (höchstens 0,09 BB je Spot) gegenüber ihrer besten Option (vorher bis zu 2 BB).
+
 ## Grenzen der Modelle
 
 - **Preflop-Quiz (6-max):** Faustregel-Ranges, nicht vom Solver berechnet.
